@@ -64,24 +64,22 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        jumpsRemaining = maxJumps;
     }
 
     private void Update()
     {
-        // decrement timers
+        // Timers
         if (wallCooldownTimer > 0f) wallCooldownTimer -= Time.deltaTime;
         if (wallJumpInputTimer > 0f) wallJumpInputTimer -= Time.deltaTime;
         if (jumpBufferCounter > 0f) jumpBufferCounter -= Time.deltaTime;
         if (!canDash) dashCooldownTimer -= Time.deltaTime;
 
-        // allow clearing justWallJumped once the player has moved away enough (or input lock expired)
+        // Clear justWallJumped after input lock expires (prevents instant re-cling)
         if (justWallJumped && wallJumpInputTimer <= 0f)
-        {
-            // only clear after the input lock expires (prevents instant re-cling)
             justWallJumped = false;
-        }
 
-        GetInput();      // updates horizontalInput and jumpBufferCounter
+        GetInput();
         CheckGround();
         CheckWall();
 
@@ -89,8 +87,7 @@ public class PlayerController : MonoBehaviour
         HandleJumpBuffer();
         HandleDash();
 
-        // choose effective horizontal for cling checks and movement:
-        // when we've just wall-jumped, ignore player's held horizontal for a short time
+        // Effective horizontal ignores held input for a short time after wall jump
         horizontalInputEffective = (wallJumpInputTimer > 0f) ? 0f : horizontalInput;
 
         if (!isDashing)
@@ -107,9 +104,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         if (isDashing)
-        {
             PerformDash();
-        }
         else
         {
             HandleMovement();
@@ -142,14 +137,12 @@ public class PlayerController : MonoBehaviour
 
     private void CheckWall()
     {
-        // Debug lines to visualize
         if (wallCheck != null)
         {
             Debug.DrawRay(wallCheck.position, Vector2.right * wallCheckDistance, Color.yellow);
             Debug.DrawRay(wallCheck.position, Vector2.left * wallCheckDistance, Color.yellow);
         }
 
-        // Raycast both sides to determine actual wall side (this avoids relying on input)
         RaycastHit2D hitRight = Physics2D.Raycast(wallCheck.position, Vector2.right, wallCheckDistance, groundLayer);
         RaycastHit2D hitLeft  = Physics2D.Raycast(wallCheck.position, Vector2.left, wallCheckDistance, groundLayer);
 
@@ -169,8 +162,7 @@ public class PlayerController : MonoBehaviour
             wallDirection = 0;
         }
 
-        // If raycasts fail in your setup (tilemap/composite collider), consider BoxCast fallback:
-        // (uncomment and tweak size/distance if needed)
+        // BoxCast fallback (uncomment if your tilemap/composite colliders need it)
         /*
         if (!isTouchingWall)
         {
@@ -202,20 +194,23 @@ public class PlayerController : MonoBehaviour
     // WALL CLING
     private void HandleWallCling()
     {
-        // don't allow cling while cooldown active or right after wall jump (input lock prevents immediate re-cling)
+        // don't allow cling while cooldown active or right after wall jump
         if (wallCooldownTimer > 0f || justWallJumped)
         {
             isWallClinging = false;
             return;
         }
 
-        // pressing into wall uses effective horizontal (which will be zero during input lock)
         bool pressingIntoWall =
             (horizontalInputEffective > 0f && wallDirection == 1) ||
             (horizontalInputEffective < 0f && wallDirection == -1);
 
         if (isTouchingWall && !isGrounded && pressingIntoWall)
         {
+            // entering cling: reset jumps (so double-jump becomes available)
+            if (!isWallClinging)
+                jumpsRemaining = maxJumps;
+
             isWallClinging = true;
             // slow slide
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, wallSlideSpeed));
@@ -232,7 +227,7 @@ public class PlayerController : MonoBehaviour
         // WALL JUMP
         if (Input.GetButtonDown("Jump") && isWallClinging)
         {
-            // apply a strong diagonal velocity AWAY from the wall (no normalization)
+            // strong diagonal away from wall (no normalization)
             Vector2 wallJumpVel = new Vector2(-wallDirection * wallJumpHorizontalForce, wallJumpVerticalForce);
             rb.linearVelocity = wallJumpVel;
 
@@ -241,7 +236,6 @@ public class PlayerController : MonoBehaviour
             wallJumpInputTimer = wallJumpInputLock;
             wallCooldownTimer = wallDetachCooldown;
             isWallClinging = false;
-
             return;
         }
 
@@ -272,10 +266,7 @@ public class PlayerController : MonoBehaviour
     {
         // If we're in the short input lock after a wall jump, don't apply player horizontal input
         if (wallJumpInputTimer > 0f)
-        {
-            // allow the wall-jump horizontal velocity to carry — do not overwrite it
             return;
-        }
 
         float targetSpeed = horizontalInput * moveSpeed;
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
