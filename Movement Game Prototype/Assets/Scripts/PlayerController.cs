@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 15f;
     [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private float lowJumpMultiplier = 2f;
-    [SerializeField] private float ascentMultiplier = 1.5f; // slows down rise at peak
+    [SerializeField] private float ascentMultiplier = 1.5f;
     [SerializeField] private bool enableDoubleJump = true;
     [SerializeField] private int maxJumps = 2;
 
@@ -38,9 +38,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpBufferTime = 0.2f;
 
     [Header("Parry Settings")]
-    [SerializeField] private LayerMask parryLayer;   // existing
-    [SerializeField] private float parryCooldown = 1f; // NEW: cooldown exposed to inspector
-    private float nextParryTime = 0f;                  // NEW: internal timer
+    [SerializeField] private LayerMask parryLayer;
+    [SerializeField] private float parryCooldown = 1f;
+    private float nextParryTime = 0f;
     [SerializeField] private float parryEndBoost = 12f;
 
     private Rigidbody2D rb;
@@ -83,6 +83,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float grappleLerpDuration = 0.3f;
     [SerializeField] private float grappleEndBoost = 8f;
     [SerializeField] private float grappleCooldown = 0.3f;
+    [SerializeField] private LineRenderer grappleLineRenderer;
     private RaycastHit2D directionalRayHit;
     private bool isRayActive;
     private float rayTimer;
@@ -97,21 +98,22 @@ public class PlayerController : MonoBehaviour
     // Sprite flash
     private SpriteRenderer sr;
     private Color originalColor;
-    private bool isRed = false;   // existing
+    private bool isRed = false;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         originalGravityScale = rb.gravityScale;
 
-        // Sprite Renderer setup
         sr = GetComponent<SpriteRenderer>();
         originalColor = sr.color;
+
+        if (grappleLineRenderer != null)
+            grappleLineRenderer.enabled = false;
     }
 
     private void Update()
     {
-        // Flash red on RIGHT-CLICK, but only if cooldown has passed (Option A behavior)
         if (Input.GetMouseButtonDown(1) && Time.time >= nextParryTime)
             StartCoroutine(FlashRedRoutine());
 
@@ -167,7 +169,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
             jumpBufferCounter = jumpBufferTime;
 
-        // Directional Ray Input
         if (Input.GetMouseButtonDown(0) && !isRayActive && !isGrappling && canGrapple)
         {
             float verticalInput = Input.GetAxisRaw("Vertical");
@@ -193,6 +194,9 @@ public class PlayerController : MonoBehaviour
                 isRayActive = false;
                 rb.gravityScale = originalGravityScale;
                 directionalRayHit = default;
+
+                if (grappleLineRenderer != null)
+                    grappleLineRenderer.enabled = false;
             }
         }
 
@@ -244,6 +248,7 @@ public class PlayerController : MonoBehaviour
             jumpBufferCounter = 0f;
         }
     }
+
     private void HandleWallCling()
     {
         wasWallClinging = isWallClinging;
@@ -379,13 +384,31 @@ public class PlayerController : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────────
-    // GRAPPLE LOGIC (UNCHANGED)
+    // GRAPPLE LOGIC
     // ─────────────────────────────────────────────────────────────
 
     public RaycastHit2D ShootDirectionalRay()
     {
         Vector2 origin = transform.position;
         directionalRayHit = Physics2D.Raycast(origin, rayDirection, directionalRayDistance, grappleLayer);
+
+        // Update line renderer
+        if (grappleLineRenderer != null)
+        {
+            grappleLineRenderer.enabled = true;
+            grappleLineRenderer.positionCount = 2;
+            grappleLineRenderer.SetPosition(0, origin);
+
+            if (directionalRayHit.collider != null &&
+                ((1 << directionalRayHit.collider.gameObject.layer) & grappleLayer) != 0)
+            {
+                grappleLineRenderer.SetPosition(1, directionalRayHit.point);
+            }
+            else
+            {
+                grappleLineRenderer.SetPosition(1, origin + rayDirection * directionalRayDistance);
+            }
+        }
 
         if (directionalRayHit.collider != null &&
             ((1 << directionalRayHit.collider.gameObject.layer) & grappleLayer) != 0)
@@ -419,11 +442,21 @@ public class PlayerController : MonoBehaviour
             transform.position = newPos;
             rb.linearVelocity = Vector2.zero;
 
+            // Update line renderer during grapple
+            if (grappleLineRenderer != null)
+            {
+                grappleLineRenderer.SetPosition(0, transform.position);
+            }
+
             yield return null;
         }
 
         transform.position = grappleTargetPos;
         isGrappling = false;
+
+        // Disable line renderer
+        if (grappleLineRenderer != null)
+            grappleLineRenderer.enabled = false;
 
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, grappleEndBoost);
         jumpsRemaining = maxJumps;
@@ -439,7 +472,7 @@ public class PlayerController : MonoBehaviour
     {
         isRed = true;
         sr.color = Color.red;
-        nextParryTime = Time.time + parryCooldown; // cooldown starts NOW
+        nextParryTime = Time.time + parryCooldown;
 
         yield return new WaitForSeconds(0.5f);
 
