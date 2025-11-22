@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     [Header("Wall Cling & Wall Jump")]
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallCheckDistance = 0.65f;
+    [SerializeField] private float wallCheckHeight = 1f;
     [SerializeField] private float wallSlideSpeed = -2f;
     [SerializeField] private float wallJumpHorizontalForce = 18f;
     [SerializeField] private float wallJumpVerticalForce = 14f;
@@ -224,10 +225,28 @@ public class PlayerController : MonoBehaviour
 
     private void CheckWall()
     {
-        RaycastHit2D hitRight =
-            Physics2D.Raycast(wallCheck.position, Vector2.right, wallCheckDistance, groundLayer);
-        RaycastHit2D hitLeft =
-            Physics2D.Raycast(wallCheck.position, Vector2.left, wallCheckDistance, groundLayer);
+        Vector2 boxCenter = wallCheck.position;
+        Vector2 boxSize = new Vector2(wallCheckDistance * 2f, wallCheckHeight);
+        
+        // Check right side
+        RaycastHit2D hitRight = Physics2D.BoxCast(
+            boxCenter, 
+            new Vector2(0.1f, wallCheckHeight), 
+            0f, 
+            Vector2.right, 
+            wallCheckDistance, 
+            groundLayer
+        );
+        
+        // Check left side
+        RaycastHit2D hitLeft = Physics2D.BoxCast(
+            boxCenter, 
+            new Vector2(0.1f, wallCheckHeight), 
+            0f, 
+            Vector2.left, 
+            wallCheckDistance, 
+            groundLayer
+        );
 
         if (hitRight.collider != null) { isTouchingWall = true; wallDirection = 1; }
         else if (hitLeft.collider != null) { isTouchingWall = true; wallDirection = -1; }
@@ -511,10 +530,19 @@ public class PlayerController : MonoBehaviour
         if (wallCheck != null)
         {
             Gizmos.color = Color.blue;
-            Gizmos.DrawLine(wallCheck.position,
-                wallCheck.position + Vector3.right * wallCheckDistance);
-            Gizmos.DrawLine(wallCheck.position,
-                wallCheck.position + Vector3.left * wallCheckDistance);
+            Vector3 checkPos = wallCheck.position;
+            
+            // Draw right box
+            Gizmos.DrawWireCube(
+                checkPos + Vector3.right * (wallCheckDistance / 2f),
+                new Vector3(wallCheckDistance, wallCheckHeight, 0f)
+            );
+            
+            // Draw left box
+            Gizmos.DrawWireCube(
+                checkPos + Vector3.left * (wallCheckDistance / 2f),
+                new Vector3(wallCheckDistance, wallCheckHeight, 0f)
+            );
         }
 
         if (isRayActive)
