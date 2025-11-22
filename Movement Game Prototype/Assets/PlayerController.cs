@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 15f;
     [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private float lowJumpMultiplier = 2f;
+    [SerializeField] private float ascentMultiplier = 1.5f; // slows down rise at peak
     [SerializeField] private bool enableDoubleJump = true;
     [SerializeField] private int maxJumps = 2;
 
@@ -62,9 +63,34 @@ public class PlayerController : MonoBehaviour
     private bool justWallJumped = false;
     private float wallJumpInputTimer = 0f;
 
+    // Facing direction
+    private int facingDirection = 1; // 1 = right, -1 = left
+    private Vector2 rayDirection; // direction the ray shoots
+
+    // Directional raycast
+    [Header("Directional Raycast")]
+    [SerializeField] private float directionalRayDistance = 10f;
+    [SerializeField] private float directionalRayDuration = 1f;
+    [SerializeField] private LayerMask grappleLayer;
+    [SerializeField] private float grappleDelay = 0.2f;
+    [SerializeField] private float grappleLerpDuration = 0.3f;
+    [SerializeField] private float grappleEndBoost = 8f;
+    [SerializeField] private float grappleCooldown = 0.3f;
+    private RaycastHit2D directionalRayHit;
+    private bool isRayActive;
+    private float rayTimer;
+    private float originalGravityScale;
+    private bool isGrappling;
+    private Vector2 grappleStartPos;
+    private Vector2 grappleTargetPos;
+    private float grappleLerpTimer;
+    private bool canGrapple = true;
+    private float grappleCooldownTimer;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        originalGravityScale = rb.gravityScale;
     }
 
     private void Update()
@@ -122,8 +148,58 @@ public class PlayerController : MonoBehaviour
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
 
+        // Update facing direction based on most recent input (only when ray is not active)
+        if (!isRayActive)
+        {
+            if (horizontalInput > 0.1f)
+                facingDirection = 1;
+            else if (horizontalInput < -0.1f)
+                facingDirection = -1;
+        }
+
         if (Input.GetButtonDown("Jump"))
             jumpBufferCounter = jumpBufferTime;
+
+        // Shoot directional ray on left click
+        if (Input.GetMouseButtonDown(0) && !isRayActive && !isGrappling && canGrapple)
+        {
+            // Determine ray direction based on vertical input
+            float verticalInput = Input.GetAxisRaw("Vertical");
+            if (verticalInput > 0.1f)
+                rayDirection = Vector2.up;
+            else if (verticalInput < -0.1f)
+                rayDirection = Vector2.down;
+            else
+                rayDirection = Vector2.right * facingDirection;
+
+            isRayActive = true;
+            rayTimer = directionalRayDuration;
+            rb.linearVelocity = Vector2.zero;
+            rb.gravityScale = 0f;
+            canGrapple = false;
+            grappleCooldownTimer = grappleCooldown;
+            ShootDirectionalRay();
+        }
+
+        // Handle ray timer
+        if (isRayActive)
+        {
+            rayTimer -= Time.deltaTime;
+            if (rayTimer <= 0f)
+            {
+                isRayActive = false;
+                rb.gravityScale = originalGravityScale;
+                directionalRayHit = default;
+            }
+        }
+
+        // Handle grapple cooldown (only count down when not actively grappling or using ray)
+        if (!canGrapple && !isGrappling && !isRayActive)
+        {
+            grappleCooldownTimer -= Time.deltaTime;
+            if (grappleCooldownTimer <= 0f)
+                canGrapple = true;
+        }
     }
 
     private void CheckGround()
@@ -221,6 +297,8 @@ public class PlayerController : MonoBehaviour
         if (isTouchingWall && !isGrounded && pressingIntoWall)
         {
             isWallClinging = true;
+            // Face away from wall when clinging
+            facingDirection = -wallDirection;
             // slow slide
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, wallSlideSpeed));
 
@@ -287,6 +365,13 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        // Freeze movement while ray is active or grappling
+        if (isRayActive || isGrappling)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         float targetSpeed = horizontalInput * moveSpeed;
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
     }
@@ -296,11 +381,8 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && !isDashing)
         {
-            float dashDir = horizontalInput;
-            if (Mathf.Abs(dashDir) < 0.1f)
-                dashDir = transform.localScale.x > 0 ? 1f : -1f;
-
-            dashDirection = new Vector2(dashDir, 0f);
+            // Use facing direction instead of current input
+            dashDirection = new Vector2(facingDirection, 0f);
             isDashing = true;
             dashTimeLeft = dashDuration;
             canDash = false;
@@ -321,15 +403,85 @@ public class PlayerController : MonoBehaviour
 
     private void ApplyBetterJump()
     {
+        // Skip gravity modifications while ray is active or grappling
+        if (isRayActive || isGrappling)
+            return;
+
         if (rb.linearVelocity.y < 0f)
         {
+            // Falling - apply fall multiplier
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;
         }
         else if (rb.linearVelocity.y > 0f && !Input.GetButton("Jump"))
         {
+            // Rising but not holding jump - cut short
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1f) * Time.fixedDeltaTime;
         }
+        else if (rb.linearVelocity.y > 0f && Input.GetButton("Jump"))
+        {
+            // Rising while holding jump - apply ascent multiplier to reach peak faster
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (ascentMultiplier - 1f) * Time.fixedDeltaTime;
+        }
     }
+
+    // DIRECTIONAL RAYCAST
+    public RaycastHit2D ShootDirectionalRay()
+    {
+        Vector2 origin = transform.position;
+
+        directionalRayHit = Physics2D.Raycast(origin, rayDirection, directionalRayDistance, grappleLayer);
+
+        // Check if hit object is on grapple layer
+        if (directionalRayHit.collider != null && ((1 << directionalRayHit.collider.gameObject.layer) & grappleLayer) != 0)
+        {
+            Debug.Log("Grapple detect");
+            StartCoroutine(GrappleToTarget(directionalRayHit.collider.transform.position));
+        }
+
+        return directionalRayHit;
+    }
+
+    private System.Collections.IEnumerator GrappleToTarget(Vector2 targetPos)
+    {
+        // Wait for delay
+        yield return new WaitForSeconds(grappleDelay);
+
+        isGrappling = true;
+        grappleStartPos = transform.position;
+        
+        // If shooting up/down, lerp Y position; if shooting left/right, lerp X position
+        if (rayDirection == Vector2.up || rayDirection == Vector2.down)
+            grappleTargetPos = new Vector2(transform.position.x, targetPos.y);
+        else
+            grappleTargetPos = new Vector2(targetPos.x, transform.position.y);
+        
+        grappleLerpTimer = 0f;
+
+        // Lerp to target
+        while (grappleLerpTimer < grappleLerpDuration)
+        {
+            grappleLerpTimer += Time.deltaTime;
+            float t = grappleLerpTimer / grappleLerpDuration;
+            Vector2 newPos = Vector2.Lerp(grappleStartPos, grappleTargetPos, t);
+            transform.position = newPos;
+            rb.linearVelocity = Vector2.zero;
+            yield return null;
+        }
+
+        // Ensure we end exactly at target
+        transform.position = grappleTargetPos;
+        isGrappling = false;
+
+        // Give vertical boost and reset abilities
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, grappleEndBoost);
+        jumpsRemaining = maxJumps;
+        canDash = true;
+        dashCooldownTimer = 0f;
+    }
+
+    public int GetFacingDirection() => facingDirection;
+    public bool DirectionalRayHit() => directionalRayHit.collider != null;
+    public RaycastHit2D GetDirectionalRayHit() => directionalRayHit;
 
     private void OnDrawGizmosSelected()
     {
@@ -344,6 +496,24 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(wallCheck.position, wallCheck.position + Vector3.right * wallCheckDistance);
             Gizmos.DrawLine(wallCheck.position, wallCheck.position + Vector3.left * wallCheckDistance);
+        }
+
+        // Directional raycast gizmo (only when active)
+        if (isRayActive)
+        {
+            Vector2 origin = transform.position;
+
+            if (directionalRayHit.collider != null)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawLine(origin, directionalRayHit.point);
+                Gizmos.DrawWireSphere(directionalRayHit.point, 0.15f);
+            }
+            else
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawLine(origin, origin + rayDirection * directionalRayDistance);
+            }
         }
     }
 }
