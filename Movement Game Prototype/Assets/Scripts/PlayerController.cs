@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -559,6 +560,14 @@ public class PlayerController : MonoBehaviour
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawLine(origin, origin + rayDirection * directionalRayDistance);
             }
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Damage"))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
