@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MenuManager : MonoBehaviour
 {
@@ -10,6 +11,10 @@ public class MenuManager : MonoBehaviour
 
     [Header("Player Scripts")]
     [SerializeField] private PlayerController _playerController;
+
+    [Header("First Selected Options")]
+    [SerializeField] private GameObject _mainMenuFirst;
+    [SerializeField] private GameObject _settingsMenuFirst;
 
     private bool isPaused;
 
@@ -64,18 +69,24 @@ public class MenuManager : MonoBehaviour
     {
         _mainMenuCanvasGO.SetActive(true);
         _settingsMenuCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(_mainMenuFirst);
     }
 
     private void OpenSettingsMenuHandle()
     {
         _mainMenuCanvasGO.SetActive(false);
         _settingsMenuCanvasGO.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(_settingsMenuFirst);
     }
 
     private void CloseAllMenus()
     {
         _mainMenuCanvasGO.SetActive(false);
         _settingsMenuCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     #endregion

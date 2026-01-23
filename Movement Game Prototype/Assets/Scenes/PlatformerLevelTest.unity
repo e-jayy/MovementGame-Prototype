@@ -151,6 +151,8 @@ MonoBehaviour:
   _mainMenuCanvasGO: {fileID: 1291702610}
   _settingsMenuCanvasGO: {fileID: 1534268197}
   _playerController: {fileID: 1285015024}
+  _mainMenuFirst: {fileID: 1033605678}
+  _settingsMenuFirst: {fileID: 1824541597}
 --- !u!4 &124421576
 Transform:
   m_ObjectHideFlags: 0
