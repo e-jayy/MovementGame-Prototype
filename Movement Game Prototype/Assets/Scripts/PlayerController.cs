@@ -116,7 +116,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1) && Time.time >= nextParryTime)
+        if (InputManager.instance.BounceInput && Time.time >= nextParryTime)
             StartCoroutine(FlashRedRoutine());
 
         if (wallCooldownTimer > 0f) wallCooldownTimer -= Time.deltaTime;
@@ -160,7 +160,7 @@ public class PlayerController : MonoBehaviour
 
     private void GetInput()
     {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
+        horizontalInput = InputManager.instance.MoveInput.x;
 
         if (!isRayActive)
         {
@@ -168,12 +168,12 @@ public class PlayerController : MonoBehaviour
             else if (horizontalInput < -0.1f) facingDirection = -1;
         }
 
-        if (Input.GetButtonDown("Jump"))
+        if (InputManager.instance.JumpJustPressed)
             jumpBufferCounter = jumpBufferTime;
 
-        if (Input.GetMouseButtonDown(0) && !isRayActive && !isGrappling && canGrapple)
+        if (InputManager.instance.HookInput && !isRayActive && !isGrappling && canGrapple)
         {
-            float verticalInput = Input.GetAxisRaw("Vertical");
+            float verticalInput = InputManager.instance.MoveInput.y;
             if (verticalInput > 0.1f) rayDirection = Vector2.up;
             else if (verticalInput < -0.1f) rayDirection = Vector2.down;
             else rayDirection = Vector2.right * facingDirection;
@@ -304,7 +304,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isWallClinging)
+        if (InputManager.instance.JumpJustPressed && isWallClinging)
         {
             Vector2 vel = new Vector2(
                 -wallDirection * wallJumpHorizontalForce,
@@ -319,7 +319,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (Input.GetButtonDown("Jump"))
+        if (InputManager.instance.JumpJustPressed)
         {
             if (coyoteTimeCounter > 0f && jumpsRemaining > 0)
             {
@@ -334,7 +334,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (Input.GetButtonUp("Jump") && rb.linearVelocity.y > 0f)
+        if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
         {
             rb.linearVelocity = new Vector2(
                 rb.linearVelocity.x,
@@ -360,7 +360,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleDash()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && !isDashing)
+        if (InputManager.instance.DashInput && canDash && !isDashing)
         {
             dashDirection = new Vector2(facingDirection, 0f);
             isDashing = true;
@@ -391,12 +391,12 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
                                  (fallMultiplier - 1f) * Time.fixedDeltaTime;
         }
-        else if (rb.linearVelocity.y > 0f && !Input.GetButton("Jump"))
+        else if (rb.linearVelocity.y > 0f && !InputManager.instance.JumpBeingHeld)
         {
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
                                  (lowJumpMultiplier - 1f) * Time.fixedDeltaTime;
         }
-        else if (rb.linearVelocity.y > 0f && Input.GetButton("Jump"))
+        else if (rb.linearVelocity.y > 0f && InputManager.instance.JumpBeingHeld)
         {
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
                                  (ascentMultiplier - 1f) * Time.fixedDeltaTime;
