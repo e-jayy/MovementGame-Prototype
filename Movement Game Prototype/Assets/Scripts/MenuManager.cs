@@ -8,6 +8,8 @@ public class MenuManager : MonoBehaviour
     [Header("Menu Objects")]
     [SerializeField] private GameObject _mainMenuCanvasGO;
     [SerializeField] private GameObject _settingsMenuCanvasGO;
+    [SerializeField] private GameObject _keyboardMenuCanvasGO;
+    [SerializeField] private GameObject _controllerMenuCanvasGO;
 
     [Header("Player Scripts")]
     [SerializeField] private PlayerController _playerController;
@@ -15,6 +17,8 @@ public class MenuManager : MonoBehaviour
     [Header("First Selected Options")]
     [SerializeField] private GameObject _mainMenuFirst;
     [SerializeField] private GameObject _settingsMenuFirst;
+    [SerializeField] private GameObject _keyboardMenuFirst;
+    [SerializeField] private GameObject _controllerMenuFirst;
 
     private bool isPaused;
 
@@ -22,6 +26,8 @@ public class MenuManager : MonoBehaviour
     {
         _mainMenuCanvasGO.SetActive(false);
         _settingsMenuCanvasGO.SetActive(false);
+        _keyboardMenuCanvasGO.SetActive(false);
+        _controllerMenuCanvasGO.SetActive(false);
     }
 
     private void Update()
@@ -81,10 +87,28 @@ public class MenuManager : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(_settingsMenuFirst);
     }
 
+    private void OpenKeyboardConfigPressHandle()
+    {
+        _keyboardMenuCanvasGO.SetActive(true);
+        _settingsMenuCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(_keyboardMenuFirst);
+    }
+
+    private void OpenControllerConfigPressHandle()
+    {
+        _controllerMenuCanvasGO.SetActive(true);
+        _settingsMenuCanvasGO.SetActive(false);
+
+        EventSystem.current.SetSelectedGameObject(_controllerMenuFirst);
+    }
+
     private void CloseAllMenus()
     {
         _mainMenuCanvasGO.SetActive(false);
         _settingsMenuCanvasGO.SetActive(false);
+        _keyboardMenuCanvasGO.SetActive(false);
+        _controllerMenuCanvasGO.SetActive(false);
 
         EventSystem.current.SetSelectedGameObject(null);
     }
@@ -96,6 +120,16 @@ public class MenuManager : MonoBehaviour
     public void OnSettingsPress()
     {
         OpenSettingsMenuHandle();
+    }
+
+    public void OnKeyboardConfigPress()
+    {
+        OpenKeyboardConfigPressHandle();
+    }
+
+    public void OnControllerConfigPress()
+    {
+        OpenControllerConfigPressHandle();
     }
 
     public void OnResumePress()
@@ -110,6 +144,18 @@ public class MenuManager : MonoBehaviour
     public void OnSettingsBackPress()
     {
         OpenMainMenu();
+    }
+
+    public void OnKeyboardConfigBackPress()
+    {
+        _keyboardMenuCanvasGO.SetActive(false);
+        _settingsMenuCanvasGO.SetActive(true);
+    }
+
+    public void OnControllerConfigBackPress()
+    {
+        _controllerMenuCanvasGO.SetActive(false);
+        _settingsMenuCanvasGO.SetActive(true);
     }
 
     #endregion
