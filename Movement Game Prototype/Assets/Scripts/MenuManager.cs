@@ -150,12 +150,16 @@ public class MenuManager : MonoBehaviour
     {
         _keyboardMenuCanvasGO.SetActive(false);
         _settingsMenuCanvasGO.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(_settingsMenuFirst);
     }
 
     public void OnControllerConfigBackPress()
     {
         _controllerMenuCanvasGO.SetActive(false);
         _settingsMenuCanvasGO.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(_settingsMenuFirst);
     }
 
     #endregion

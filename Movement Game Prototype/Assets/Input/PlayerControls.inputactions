@@ -98,7 +98,7 @@
                 {
                     "name": "",
                     "id": "89115d62-975a-4928-8146-f1d4c8e80ed3",
-                    "path": "<Keyboard>/shift",
+                    "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -134,7 +134,7 @@
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Hook",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -142,10 +142,10 @@
                 {
                     "name": "",
                     "id": "1d1d36f1-be17-4e50-9096-c4171214be27",
-                    "path": "<DualShockGamepad>/rightTrigger",
+                    "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Gamepad",
                     "action": "Hook",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -156,7 +156,7 @@
                     "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Bounce",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -164,10 +164,10 @@
                 {
                     "name": "",
                     "id": "6a36e82e-40b1-43cb-a1f0-dedc71486c9a",
-                    "path": "<DualShockGamepad>/leftTrigger",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Gamepad",
                     "action": "Bounce",
                     "isComposite": false,
                     "isPartOfComposite": false
