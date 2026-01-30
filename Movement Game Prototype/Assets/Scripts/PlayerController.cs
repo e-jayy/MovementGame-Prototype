@@ -90,6 +90,7 @@ public class PlayerController : MonoBehaviour
     private bool isRayActive;
     private float rayTimer;
     private float originalGravityScale;
+    private bool isGrapplingToTarget;
     private bool isGrappling;
     private Vector2 grappleStartPos;
     private Vector2 grappleTargetPos;
@@ -171,7 +172,9 @@ public class PlayerController : MonoBehaviour
         if (InputManager.instance.JumpJustPressed)
             jumpBufferCounter = jumpBufferTime;
 
-        if (InputManager.instance.HookInput && !isRayActive && !isGrappling && canGrapple)
+
+        //Hook input
+        if (InputManager.instance.HookInput && !isRayActive && !isGrapplingToTarget && canGrapple)
         {
             float verticalInput = InputManager.instance.MoveInput.y;
             if (verticalInput > 0.1f) rayDirection = Vector2.up;
@@ -179,6 +182,7 @@ public class PlayerController : MonoBehaviour
             else rayDirection = Vector2.right * facingDirection;
 
             isRayActive = true;
+            isGrappling = true;
             rayTimer = directionalRayDuration;
             rb.linearVelocity = Vector2.zero;
             rb.gravityScale = 0f;
@@ -196,13 +200,14 @@ public class PlayerController : MonoBehaviour
                 isRayActive = false;
                 rb.gravityScale = originalGravityScale;
                 directionalRayHit = default;
+                isGrappling = false;
 
                 if (grappleLineRenderer != null)
                     grappleLineRenderer.enabled = false;
             }
         }
 
-        if (!canGrapple && !isGrappling && !isRayActive)
+        if (!canGrapple && !isGrapplingToTarget && !isRayActive)
         {
             grappleCooldownTimer -= Time.deltaTime;
             if (grappleCooldownTimer <= 0f)
@@ -348,7 +353,7 @@ public class PlayerController : MonoBehaviour
         if (wallJumpInputTimer > 0f)
             return;
 
-        if (isRayActive || isGrappling)
+        if (isRayActive || isGrapplingToTarget)
         {
             rb.linearVelocity = Vector2.zero;
             return;
@@ -360,7 +365,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleDash()
     {
-        if (InputManager.instance.DashInput && canDash && !isDashing)
+        if (InputManager.instance.DashInput && canDash && !isDashing && !isGrapplingToTarget && !isGrappling)
         {
             dashDirection = new Vector2(facingDirection, 0f);
             isDashing = true;
@@ -384,7 +389,7 @@ public class PlayerController : MonoBehaviour
 
     private void ApplyBetterJump()
     {
-        if (isRayActive || isGrappling) return;
+        if (isRayActive || isGrapplingToTarget) return;
 
         if (rb.linearVelocity.y < 0f)
         {
@@ -403,9 +408,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // GRAPPLE LOGIC
-    // ─────────────────────────────────────────────────────────────
+//Grapple logic
 
     public RaycastHit2D ShootDirectionalRay()
     {
@@ -443,7 +446,7 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(grappleDelay);
 
-        isGrappling = true;
+        isGrapplingToTarget = true;
         grappleStartPos = transform.position;
 
         if (rayDirection == Vector2.up || rayDirection == Vector2.down)
@@ -472,7 +475,7 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.position = grappleTargetPos;
-        isGrappling = false;
+        isGrapplingToTarget = false;
 
         // Disable line renderer
         if (grappleLineRenderer != null)
