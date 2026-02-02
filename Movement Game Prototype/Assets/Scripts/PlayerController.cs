@@ -39,11 +39,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float coyoteTime = 0.2f;
     [SerializeField] private float jumpBufferTime = 0.2f;
 
-    [Header("Parry Settings")]
-    [SerializeField] private LayerMask parryLayer;
-    [SerializeField] private float parryCooldown = 1f;
-    private float nextParryTime = 0f;
-    [SerializeField] private float parryEndBoost = 12f;
+    [Header("Bounce Settings")]
+    [SerializeField] private LayerMask bounceLayer;
+    [SerializeField] private float bounceCooldown = 1f;
+    private float nextBounceTime = 0f;
+    [SerializeField] private float bounceEndBoost = 12f;
 
     private Rigidbody2D rb;
 
@@ -117,8 +117,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (InputManager.instance.BounceInput && Time.time >= nextParryTime)
-            StartCoroutine(FlashRedRoutine());
+        if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
+            StartCoroutine(BounceRoutine());
 
         if (wallCooldownTimer > 0f) wallCooldownTimer -= Time.deltaTime;
         if (wallJumpInputTimer > 0f) wallJumpInputTimer -= Time.deltaTime;
@@ -128,10 +128,11 @@ public class PlayerController : MonoBehaviour
         if (justWallJumped && wallJumpInputTimer <= 0f)
             justWallJumped = false;
 
-        GetInput();
+        GetHorizontalInput();
         CheckGround();
         CheckWall();
-
+        
+        HandleHook();
         HandleCoyoteTime();
         HandleJumpBuffer();
         HandleDash();
@@ -159,7 +160,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void GetInput()
+    private void GetHorizontalInput()
     {
         horizontalInput = InputManager.instance.MoveInput.x;
 
@@ -171,9 +172,210 @@ public class PlayerController : MonoBehaviour
 
         if (InputManager.instance.JumpJustPressed)
             jumpBufferCounter = jumpBufferTime;
+    }
+    private void HandleMovement()
+    {
+        if (wallJumpInputTimer > 0f)
+            return;
 
+        if (isRayActive || isGrapplingToTarget)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
 
-        //Hook input
+        float targetSpeed = horizontalInput * moveSpeed;
+        rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
+    }
+
+    #region WallCling Functions
+    private void CheckWall()
+    {
+        Vector2 boxCenter = wallCheck.position;
+        Vector2 boxSize = new Vector2(wallCheckDistance * 2f, wallCheckHeight);
+        
+        // Check right side
+        RaycastHit2D hitRight = Physics2D.BoxCast(
+            boxCenter, 
+            new Vector2(0.1f, wallCheckHeight), 
+            0f, 
+            Vector2.right, 
+            wallCheckDistance, 
+            groundLayer
+        );
+        
+        // Check left side
+        RaycastHit2D hitLeft = Physics2D.BoxCast(
+            boxCenter, 
+            new Vector2(0.1f, wallCheckHeight), 
+            0f, 
+            Vector2.left, 
+            wallCheckDistance, 
+            groundLayer
+        );
+
+        if (hitRight.collider != null) { isTouchingWall = true; wallDirection = 1; }
+        else if (hitLeft.collider != null) { isTouchingWall = true; wallDirection = -1; }
+        else { isTouchingWall = false; wallDirection = 0; }
+    }
+    
+    
+
+    private void HandleWallCling()
+    {
+        wasWallClinging = isWallClinging;
+
+        if (wallCooldownTimer > 0f || justWallJumped)
+        {
+            isWallClinging = false;
+            return;
+        }
+
+        bool pressingIntoWall =
+            (horizontalInputEffective > 0f && wallDirection == 1) ||
+            (horizontalInputEffective < 0f && wallDirection == -1);
+
+        if (isTouchingWall && !isGrounded && pressingIntoWall)
+        {
+            isWallClinging = true;
+            facingDirection = -wallDirection;
+
+            rb.linearVelocity = new Vector2(
+                rb.linearVelocity.x,
+                Mathf.Max(rb.linearVelocity.y, wallSlideSpeed)
+            );
+
+            if (!wasWallClinging)
+                jumpsRemaining = maxJumps;
+        }
+        else
+        {
+            isWallClinging = false;
+        }
+    }
+    #endregion
+
+    #region Jump Functions
+    
+    private void CheckGround()
+    {
+        wasGrounded = isGrounded;
+        isGrounded = Physics2D.OverlapBox(groundCheck.position, groundCheckSize, 0f, groundLayer);
+
+        if (isGrounded) jumpsRemaining = maxJumps;
+
+        if (isGrounded && !wasGrounded)
+        {
+            canDash = true;
+            dashCooldownTimer = 0f;
+        }
+    }
+    
+    private void HandleCoyoteTime()
+    {
+        if (isGrounded) coyoteTimeCounter = coyoteTime;
+        else coyoteTimeCounter -= Time.deltaTime;
+    }
+    private void HandleJump()
+    {
+        if (InputManager.instance.JumpJustPressed && isWallClinging)
+        {
+            Vector2 vel = new Vector2(
+                -wallDirection * wallJumpHorizontalForce,
+                wallJumpVerticalForce
+            );
+
+            rb.linearVelocity = vel;
+            justWallJumped = true;
+            wallJumpInputTimer = wallJumpInputLock;
+            wallCooldownTimer = wallDetachCooldown;
+            isWallClinging = false;
+            return;
+        }
+
+        if (InputManager.instance.JumpJustPressed)
+        {
+            if (coyoteTimeCounter > 0f && jumpsRemaining > 0)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                jumpsRemaining--;
+                coyoteTimeCounter = 0f;
+            }
+            else if (enableDoubleJump && jumpsRemaining > 0 && !isGrounded)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                jumpsRemaining--;
+            }
+        }
+
+        if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
+        {
+            rb.linearVelocity = new Vector2(
+                rb.linearVelocity.x,
+                rb.linearVelocity.y * 0.5f
+            );
+        }
+    }
+    
+    private void HandleJumpBuffer()
+    {
+        if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            jumpBufferCounter = 0f;
+        }
+    }
+    
+    private void ApplyBetterJump()
+    {
+        if (isRayActive || isGrapplingToTarget) return;
+
+        if (rb.linearVelocity.y < 0f)
+        {
+            rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime);
+        }
+        else if (rb.linearVelocity.y > 0f && !InputManager.instance.JumpBeingHeld)
+        {
+            rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (lowJumpMultiplier - 1f) * Time.fixedDeltaTime);
+        }
+        else if (rb.linearVelocity.y > 0f && InputManager.instance.JumpBeingHeld)
+        {
+            rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (ascentMultiplier - 1f) * Time.fixedDeltaTime);
+        }
+    }
+    
+    #endregion
+    
+    #region Dash Functions
+    private void HandleDash()
+    {
+        if (InputManager.instance.DashInput && canDash && !isDashing && !isGrapplingToTarget && !isGrappling)
+        {
+            dashDirection = new Vector2(facingDirection, 0f);
+            isDashing = true;
+            dashTimeLeft = dashDuration;
+            canDash = false;
+            dashCooldownTimer = dashCooldown;
+        }
+
+        if (isDashing)
+        {
+            dashTimeLeft -= Time.deltaTime;
+            if (dashTimeLeft <= 0f)
+                isDashing = false;
+        }
+    }
+    
+    private void PerformDash()
+    {
+        rb.linearVelocity = dashDirection * dashSpeed;
+    }
+    
+    #endregion
+
+    #region Hook Functions
+    private void HandleHook()
+    {
         if (InputManager.instance.HookInput && !isRayActive && !isGrapplingToTarget && canGrapple)
         {
             float verticalInput = InputManager.instance.MoveInput.y;
@@ -215,201 +417,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void CheckGround()
-    {
-        wasGrounded = isGrounded;
-        isGrounded = Physics2D.OverlapBox(groundCheck.position, groundCheckSize, 0f, groundLayer);
-
-        if (isGrounded) jumpsRemaining = maxJumps;
-
-        if (isGrounded && !wasGrounded)
-        {
-            canDash = true;
-            dashCooldownTimer = 0f;
-        }
-    }
-
-    private void CheckWall()
-    {
-        Vector2 boxCenter = wallCheck.position;
-        Vector2 boxSize = new Vector2(wallCheckDistance * 2f, wallCheckHeight);
-        
-        // Check right side
-        RaycastHit2D hitRight = Physics2D.BoxCast(
-            boxCenter, 
-            new Vector2(0.1f, wallCheckHeight), 
-            0f, 
-            Vector2.right, 
-            wallCheckDistance, 
-            groundLayer
-        );
-        
-        // Check left side
-        RaycastHit2D hitLeft = Physics2D.BoxCast(
-            boxCenter, 
-            new Vector2(0.1f, wallCheckHeight), 
-            0f, 
-            Vector2.left, 
-            wallCheckDistance, 
-            groundLayer
-        );
-
-        if (hitRight.collider != null) { isTouchingWall = true; wallDirection = 1; }
-        else if (hitLeft.collider != null) { isTouchingWall = true; wallDirection = -1; }
-        else { isTouchingWall = false; wallDirection = 0; }
-    }
-
-    private void HandleCoyoteTime()
-    {
-        if (isGrounded) coyoteTimeCounter = coyoteTime;
-        else coyoteTimeCounter -= Time.deltaTime;
-    }
-
-    private void HandleJumpBuffer()
-    {
-        if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            jumpBufferCounter = 0f;
-        }
-    }
-
-    private void HandleWallCling()
-    {
-        wasWallClinging = isWallClinging;
-
-        if (wallCooldownTimer > 0f || justWallJumped)
-        {
-            isWallClinging = false;
-            return;
-        }
-
-        bool pressingIntoWall =
-            (horizontalInputEffective > 0f && wallDirection == 1) ||
-            (horizontalInputEffective < 0f && wallDirection == -1);
-
-        if (isTouchingWall && !isGrounded && pressingIntoWall)
-        {
-            isWallClinging = true;
-            facingDirection = -wallDirection;
-
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                Mathf.Max(rb.linearVelocity.y, wallSlideSpeed)
-            );
-
-            if (!wasWallClinging)
-                jumpsRemaining = maxJumps;
-        }
-        else
-        {
-            isWallClinging = false;
-        }
-    }
-
-    private void HandleJump()
-    {
-        if (InputManager.instance.JumpJustPressed && isWallClinging)
-        {
-            Vector2 vel = new Vector2(
-                -wallDirection * wallJumpHorizontalForce,
-                wallJumpVerticalForce
-            );
-
-            rb.linearVelocity = vel;
-            justWallJumped = true;
-            wallJumpInputTimer = wallJumpInputLock;
-            wallCooldownTimer = wallDetachCooldown;
-            isWallClinging = false;
-            return;
-        }
-
-        if (InputManager.instance.JumpJustPressed)
-        {
-            if (coyoteTimeCounter > 0f && jumpsRemaining > 0)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                jumpsRemaining--;
-                coyoteTimeCounter = 0f;
-            }
-            else if (enableDoubleJump && jumpsRemaining > 0 && !isGrounded)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                jumpsRemaining--;
-            }
-        }
-
-        if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
-        {
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                rb.linearVelocity.y * 0.5f
-            );
-        }
-    }
-
-    private void HandleMovement()
-    {
-        if (wallJumpInputTimer > 0f)
-            return;
-
-        if (isRayActive || isGrapplingToTarget)
-        {
-            rb.linearVelocity = Vector2.zero;
-            return;
-        }
-
-        float targetSpeed = horizontalInput * moveSpeed;
-        rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
-    }
-
-    private void HandleDash()
-    {
-        if (InputManager.instance.DashInput && canDash && !isDashing && !isGrapplingToTarget && !isGrappling)
-        {
-            dashDirection = new Vector2(facingDirection, 0f);
-            isDashing = true;
-            dashTimeLeft = dashDuration;
-            canDash = false;
-            dashCooldownTimer = dashCooldown;
-        }
-
-        if (isDashing)
-        {
-            dashTimeLeft -= Time.deltaTime;
-            if (dashTimeLeft <= 0f)
-                isDashing = false;
-        }
-    }
-
-    private void PerformDash()
-    {
-        rb.linearVelocity = dashDirection * dashSpeed;
-    }
-
-    private void ApplyBetterJump()
-    {
-        if (isRayActive || isGrapplingToTarget) return;
-
-        if (rb.linearVelocity.y < 0f)
-        {
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
-                                 (fallMultiplier - 1f) * Time.fixedDeltaTime;
-        }
-        else if (rb.linearVelocity.y > 0f && !InputManager.instance.JumpBeingHeld)
-        {
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
-                                 (lowJumpMultiplier - 1f) * Time.fixedDeltaTime;
-        }
-        else if (rb.linearVelocity.y > 0f && InputManager.instance.JumpBeingHeld)
-        {
-            rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
-                                 (ascentMultiplier - 1f) * Time.fixedDeltaTime;
-        }
-    }
-
-//Grapple logic
-
     public RaycastHit2D ShootDirectionalRay()
     {
         Vector2 origin = transform.position;
@@ -441,6 +448,7 @@ public class PlayerController : MonoBehaviour
 
         return directionalRayHit;
     }
+    
 
     private IEnumerator GrappleToTarget(Vector2 targetPos)
     {
@@ -486,38 +494,40 @@ public class PlayerController : MonoBehaviour
         canDash = true;
         dashCooldownTimer = 0f;
     }
+    
+    #endregion
 
-    // ─────────────────────────────────────────────────────────────
-    //  PARRY (FLASH RED + COLLISION CHECK + COOLDOWN)
-    // ─────────────────────────────────────────────────────────────
-
-    private IEnumerator FlashRedRoutine()
+    #region Bounce Function
+    private IEnumerator BounceRoutine()
     {
         isRed = true;
         sr.color = Color.red;
-        nextParryTime = Time.time + parryCooldown;
+        nextBounceTime = Time.time + bounceCooldown;
+        
+        Debug.Log("isRed = " + isRed);
 
         yield return new WaitForSeconds(0.5f);
 
         sr.color = originalColor;
         isRed = false;
     }
+    #endregion
 
     private void OnTriggerStay2D(Collider2D other)
     {
+        //Debug.Log("Trigger with: " + other.name);
+        //Debug.Log($"Trigger stay with {other.name}, layer = {other.gameObject.layer}");
         if (!isRed) return;
 
-        if (((1 << other.gameObject.layer) & parryLayer) != 0)
+        if (other.gameObject.layer == 8)
         {
-            Debug.Log("Parry detected");
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, parryEndBoost);
+            Debug.Log("Bounce detected");
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, bounceEndBoost);
             jumpsRemaining = maxJumps;
             canDash = true;
             dashCooldownTimer = 0f;
         }
     }
-
-    // ─────────────────────────────────────────────────────────────
 
     public int GetFacingDirection() => facingDirection;
     public bool DirectionalRayHit() => directionalRayHit.collider != null;
@@ -570,7 +580,12 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.collider.CompareTag("Damage"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            TakeDamage();
         }
+    }
+
+    private void TakeDamage()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

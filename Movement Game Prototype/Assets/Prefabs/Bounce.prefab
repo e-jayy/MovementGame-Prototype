@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3378986408184520060}
   - component: {fileID: 1005863609914080831}
   m_Layer: 8
-  m_Name: Parry
+  m_Name: Bounce
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
