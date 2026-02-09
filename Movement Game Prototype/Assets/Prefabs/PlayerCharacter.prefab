@@ -209,21 +209,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dd1c6f59a53c074a959811d8d8328f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unlockedDash: 0
+  unlockedHook: 0
+  unlockedWallJump: 0
+  unlockedDoubleJump: 0
   moveSpeed: 7
   jumpForce: 10
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
   ascentMultiplier: 1.5
-  enableDoubleJump: 1
   maxJumps: 1
+  maxFallSpeed: -20
   wallCheck: {fileID: 800755548540785703}
   wallCheckDistance: 0.6
-  wallCheckHeight: 1
+  wallCheckHeight: 0.5
   wallSlideSpeed: -2
-  wallJumpHorizontalForce: 11
-  wallJumpVerticalForce: 13
+  wallJumpHorizontalForce: 9
+  wallJumpVerticalForce: 7
   wallDetachCooldown: 0.12
-  wallJumpInputLock: 0.14
+  wallJumpInputLock: 0.35
   groundCheck: {fileID: 1350386310103286853}
   groundCheckSize: {x: 0.5, y: 0.1}
   groundLayer:
@@ -234,11 +238,11 @@ MonoBehaviour:
   dashCooldown: 1
   coyoteTime: 0.2
   jumpBufferTime: 0.2
-  parryLayer:
+  bounceLayer:
     serializedVersion: 2
-    m_Bits: 256
-  parryCooldown: 2
-  parryEndBoost: 12
+    m_Bits: 0
+  bounceCooldown: 1
+  bounceEndBoost: 12
   directionalRayDistance: 6
   directionalRayDuration: 0.4
   grappleLayer:

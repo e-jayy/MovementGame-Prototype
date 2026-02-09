@@ -4,6 +4,15 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("UnlockedAbilities")]
+    //Add these values into a player manager singleton later
+    [SerializeField] private bool unlockedDash;
+    [SerializeField] private bool unlockedHook;
+    [SerializeField] private bool unlockedWallJump;
+    [SerializeField] private bool unlockedDoubleJump;
+
+    
+    
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 7f;
 
@@ -12,18 +21,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private float lowJumpMultiplier = 2f;
     [SerializeField] private float ascentMultiplier = 1.5f;
-    [SerializeField] private bool enableDoubleJump = true;
     [SerializeField] private int maxJumps = 2;
+
+    [Header("Fall Speed Cap")]
+    [SerializeField] private float maxFallSpeed = -20f;
 
     [Header("Wall Cling & Wall Jump")]
     [SerializeField] private Transform wallCheck;
-    [SerializeField] private float wallCheckDistance = 0.65f;
-    [SerializeField] private float wallCheckHeight = 1f;
+    [SerializeField] private float wallCheckDistance = 0.6f;
+    [SerializeField] private float wallCheckHeight = 0.5f;
     [SerializeField] private float wallSlideSpeed = -2f;
-    [SerializeField] private float wallJumpHorizontalForce = 18f;
-    [SerializeField] private float wallJumpVerticalForce = 14f;
+    [SerializeField] private float wallJumpHorizontalForce = 9f;
+    [SerializeField] private float wallJumpVerticalForce = 11f;
     [SerializeField] private float wallDetachCooldown = 0.12f;
-    [SerializeField] private float wallJumpInputLock = 0.14f;
+    [SerializeField] private float wallJumpInputLock = 0.35f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -86,6 +97,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float grappleEndBoost = 8f;
     [SerializeField] private float grappleCooldown = 0.3f;
     [SerializeField] private LineRenderer grappleLineRenderer;
+
     private RaycastHit2D directionalRayHit;
     private bool isRayActive;
     private float rayTimer;
@@ -131,13 +143,15 @@ public class PlayerController : MonoBehaviour
         GetHorizontalInput();
         CheckGround();
         CheckWall();
-        
+
         HandleHook();
         HandleCoyoteTime();
         HandleJumpBuffer();
         HandleDash();
+        
+        HandleAbilityUnlocks();
 
-        horizontalInputEffective = (wallJumpInputTimer > 0f) ? 0f : horizontalInput;
+        horizontalInputEffective = (wallJumpInputTimer > 0f) ? 0f : horizontalInput; //If the wall-jump input lock timer is still running, ignore horizontal input. Otherwise, use the players real horizontal input
 
         if (!isDashing)
         {
@@ -173,9 +187,10 @@ public class PlayerController : MonoBehaviour
         if (InputManager.instance.JumpJustPressed)
             jumpBufferCounter = jumpBufferTime;
     }
+
     private void HandleMovement()
     {
-        if (wallJumpInputTimer > 0f)
+        if (wallJumpInputTimer > 0f) // Locks input when wall jumping
             return;
 
         if (isRayActive || isGrapplingToTarget)
@@ -184,42 +199,43 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float targetSpeed = horizontalInput * moveSpeed;
-        rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
     }
 
-    #region WallCling Functions
+    #region Wall
     private void CheckWall()
     {
-        Vector2 boxCenter = wallCheck.position;
-        Vector2 boxSize = new Vector2(wallCheckDistance * 2f, wallCheckHeight);
-        
-        // Check right side
         RaycastHit2D hitRight = Physics2D.BoxCast(
-            boxCenter, 
-            new Vector2(0.1f, wallCheckHeight), 
-            0f, 
-            Vector2.right, 
-            wallCheckDistance, 
-            groundLayer
-        );
-        
-        // Check left side
-        RaycastHit2D hitLeft = Physics2D.BoxCast(
-            boxCenter, 
-            new Vector2(0.1f, wallCheckHeight), 
-            0f, 
-            Vector2.left, 
-            wallCheckDistance, 
+            wallCheck.position,
+            new Vector2(0.1f, wallCheckHeight),
+            0f,
+            Vector2.right,
+            wallCheckDistance,
             groundLayer
         );
 
-        if (hitRight.collider != null) { isTouchingWall = true; wallDirection = 1; }
-        else if (hitLeft.collider != null) { isTouchingWall = true; wallDirection = -1; }
+        RaycastHit2D hitLeft = Physics2D.BoxCast(
+            wallCheck.position,
+            new Vector2(0.1f, wallCheckHeight),
+            0f,
+            Vector2.left,
+            wallCheckDistance,
+            groundLayer
+        );
+
+        if (hitRight.collider != null)
+        { 
+            isTouchingWall = true; 
+            wallDirection = 1;
+        }
+        
+        else if (hitLeft.collider != null)
+        {
+            isTouchingWall = true; 
+            wallDirection = -1;
+        }
         else { isTouchingWall = false; wallDirection = 0; }
     }
-    
-    
 
     private void HandleWallCling()
     {
@@ -255,8 +271,7 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
-    #region Jump Functions
-    
+    #region Jump
     private void CheckGround()
     {
         wasGrounded = isGrounded;
@@ -270,22 +285,19 @@ public class PlayerController : MonoBehaviour
             dashCooldownTimer = 0f;
         }
     }
-    
+
     private void HandleCoyoteTime()
     {
         if (isGrounded) coyoteTimeCounter = coyoteTime;
         else coyoteTimeCounter -= Time.deltaTime;
     }
+
     private void HandleJump()
     {
         if (InputManager.instance.JumpJustPressed && isWallClinging)
         {
-            Vector2 vel = new Vector2(
-                -wallDirection * wallJumpHorizontalForce,
-                wallJumpVerticalForce
-            );
+            rb.linearVelocity = new Vector2(-wallDirection * wallJumpHorizontalForce, wallJumpVerticalForce);
 
-            rb.linearVelocity = vel;
             justWallJumped = true;
             wallJumpInputTimer = wallJumpInputLock;
             wallCooldownTimer = wallDetachCooldown;
@@ -301,7 +313,7 @@ public class PlayerController : MonoBehaviour
                 jumpsRemaining--;
                 coyoteTimeCounter = 0f;
             }
-            else if (enableDoubleJump && jumpsRemaining > 0 && !isGrounded)
+            else if (unlockedDoubleJump && jumpsRemaining > 0 && !isGrounded)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 jumpsRemaining--;
@@ -310,13 +322,10 @@ public class PlayerController : MonoBehaviour
 
         if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
         {
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                rb.linearVelocity.y * 0.5f
-            );
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
         }
     }
-    
+
     private void HandleJumpBuffer()
     {
         if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
@@ -325,7 +334,7 @@ public class PlayerController : MonoBehaviour
             jumpBufferCounter = 0f;
         }
     }
-    
+
     private void ApplyBetterJump()
     {
         if (isRayActive || isGrapplingToTarget) return;
@@ -342,11 +351,16 @@ public class PlayerController : MonoBehaviour
         {
             rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (ascentMultiplier - 1f) * Time.fixedDeltaTime);
         }
+
+        // 👇 FALL SPEED CAP
+        if (rb.linearVelocity.y < maxFallSpeed)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
+        }
     }
-    
     #endregion
-    
-    #region Dash Functions
+
+    #region Dash
     private void HandleDash()
     {
         if (InputManager.instance.DashInput && canDash && !isDashing && !isGrapplingToTarget && !isGrappling)
@@ -365,7 +379,7 @@ public class PlayerController : MonoBehaviour
                 isDashing = false;
         }
     }
-    
+
     private void PerformDash()
     {
         rb.linearVelocity = dashDirection * dashSpeed;
@@ -511,6 +525,20 @@ public class PlayerController : MonoBehaviour
         sr.color = originalColor;
         isRed = false;
     }
+    #endregion
+
+    #region Unlock Ability Functions
+
+    public void HandleAbilityUnlocks()
+    {
+        if (unlockedWallJump)
+        {
+            wallJumpInputLock = 0.14f;
+            wallJumpHorizontalForce = 11f;
+            wallJumpVerticalForce = 13f;
+        }
+    }
+
     #endregion
 
     private void OnTriggerStay2D(Collider2D other)
