@@ -363,7 +363,7 @@ public class PlayerController : MonoBehaviour
     #region Dash
     private void HandleDash()
     {
-        if (InputManager.instance.DashInput && canDash && !isDashing && !isGrapplingToTarget && !isGrappling)
+        if (InputManager.instance.DashInput && canDash && !isDashing && !isGrapplingToTarget && !isGrappling && unlockedDash)
         {
             dashDirection = new Vector2(facingDirection, 0f);
             isDashing = true;
@@ -390,7 +390,7 @@ public class PlayerController : MonoBehaviour
     #region Hook Functions
     private void HandleHook()
     {
-        if (InputManager.instance.HookInput && !isRayActive && !isGrapplingToTarget && canGrapple)
+        if (InputManager.instance.HookInput && !isRayActive && !isGrapplingToTarget && canGrapple && unlockedHook)
         {
             float verticalInput = InputManager.instance.MoveInput.y;
             if (verticalInput > 0.1f) rayDirection = Vector2.up;
@@ -531,11 +531,41 @@ public class PlayerController : MonoBehaviour
 
     public void HandleAbilityUnlocks()
     {
+        if (PlayerManager.Instance.WallJumpUnlocked)
+        {
+            unlockedWallJump = true;
+        }
+        UnlockWallJump();
+
+        if (PlayerManager.Instance.DoubleJumpUnlocked)
+        {
+            unlockedDoubleJump = true;
+        }
+
+        if (PlayerManager.Instance.HookUnlocked)
+        {
+            unlockedHook = true;
+        }
+
+        if (PlayerManager.Instance.DashUnlocked)
+        {
+            unlockedDash = true;
+        }
+    }
+
+    public void UnlockWallJump()
+    {
         if (unlockedWallJump)
         {
             wallJumpInputLock = 0.14f;
             wallJumpHorizontalForce = 11f;
             wallJumpVerticalForce = 13f;
+        }
+        else if (!unlockedWallJump)
+        {
+            wallJumpHorizontalForce = 9f;
+            wallJumpVerticalForce = 7f;
+            wallJumpInputLock = 0.35f;
         }
     }
 
