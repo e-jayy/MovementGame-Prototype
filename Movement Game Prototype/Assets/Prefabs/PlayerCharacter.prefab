@@ -219,7 +219,7 @@ MonoBehaviour:
   lowJumpMultiplier: 2
   ascentMultiplier: 1.5
   maxJumps: 1
-  maxFallSpeed: -20
+  maxFallSpeed: -18
   wallCheck: {fileID: 800755548540785703}
   wallCheckDistance: 0.6
   wallCheckHeight: 0.5
