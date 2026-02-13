@@ -186,7 +186,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1.25
+  m_GravityScale: 2
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -215,30 +215,30 @@ MonoBehaviour:
   unlockedWallJump: 0
   unlockedDoubleJump: 0
   moveSpeed: 6
-  jumpForce: 13
+  jumpForce: 11
   fallMultiplier: 15
   lowJumpMultiplier: 1.8
   highJumpMultiplier: 2
   maxJumps: 1
-  maxFallSpeed: -15
+  maxFallSpeed: -12
   wallCheck: {fileID: 800755548540785703}
   wallCheckDistance: 0.6
   wallCheckHeight: 1
   wallSlideSpeed: -2
   wallDetachCooldown: 0.12
-  OldwallJumpHorizontalForce: 10
-  OldwallJumpVerticalForce: 12
+  OldwallJumpHorizontalForce: 8
+  OldwallJumpVerticalForce: 10
   OldwallJumpInputLock: 0.35
-  NewwallJumpHorizontalForce: 12
-  NewwallJumpVerticalForce: 12
+  NewwallJumpHorizontalForce: 10
+  NewwallJumpVerticalForce: 10
   NewwallJumpInputLock: 0.14
   groundCheck: {fileID: 1350386310103286853}
   groundCheckSize: {x: 0.5, y: 0.1}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  dashSpeed: 15
-  dashDuration: 0.2
+  dashSpeed: 20
+  dashDuration: 0.15
   dashCooldown: 1
   coyoteTime: 0.2
   jumpBufferTime: 0.2
