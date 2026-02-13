@@ -26,15 +26,26 @@ public class PlayerController : MonoBehaviour
     [Header("Fall Speed Cap")]
     [SerializeField] private float maxFallSpeed = -20f;
 
-    [Header("Wall Cling & Wall Jump")]
+    [Header("Wall Cling")]
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallCheckDistance = 0.6f;
     [SerializeField] private float wallCheckHeight = 0.5f;
     [SerializeField] private float wallSlideSpeed = -2f;
-    [SerializeField] private float wallJumpHorizontalForce = 9f;
-    [SerializeField] private float wallJumpVerticalForce = 11f;
+    private float wallJumpHorizontalForce;
+    private float wallJumpVerticalForce;
+    private float wallJumpInputLock;
     [SerializeField] private float wallDetachCooldown = 0.12f;
-    [SerializeField] private float wallJumpInputLock = 0.35f;
+
+    [Header("Wall Jump")]
+    [SerializeField] private float OldwallJumpHorizontalForce = 9f;
+    [SerializeField] private float OldwallJumpVerticalForce = 7f;
+    [SerializeField] private float OldwallJumpInputLock = 0.35f;
+
+    [Header("Wall Jump Ability Upgrade")]
+    
+    [SerializeField] private float NewwallJumpHorizontalForce = 9f;
+    [SerializeField] private float NewwallJumpVerticalForce = 9f;
+    [SerializeField] private float NewwallJumpInputLock = 0.14f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -265,8 +276,7 @@ public class PlayerController : MonoBehaviour
                 Mathf.Max(rb.linearVelocity.y, wallSlideSpeed)
             );
 
-            if (!wasWallClinging)
-                jumpsRemaining = maxJumps;
+            
         }
         else
         {
@@ -573,15 +583,15 @@ public class PlayerController : MonoBehaviour
     {
         if (unlockedWallJump)
         {
-            wallJumpInputLock = 0.14f;
-            wallJumpHorizontalForce = 9f;
-            wallJumpVerticalForce = 9f;
+            wallJumpHorizontalForce = NewwallJumpHorizontalForce;
+            wallJumpVerticalForce = NewwallJumpVerticalForce;
+            wallJumpInputLock = NewwallJumpInputLock;
         }
         else if (!unlockedWallJump)
         {
-            wallJumpHorizontalForce = 9f;
-            wallJumpVerticalForce = 7f;
-            wallJumpInputLock = 0.35f;
+            wallJumpHorizontalForce = OldwallJumpHorizontalForce;
+            wallJumpVerticalForce = OldwallJumpVerticalForce;
+            wallJumpInputLock = OldwallJumpInputLock;
         }
     }
 

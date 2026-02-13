@@ -214,8 +214,8 @@ MonoBehaviour:
   unlockedHook: 0
   unlockedWallJump: 0
   unlockedDoubleJump: 0
-  moveSpeed: 5
-  jumpForce: 9
+  moveSpeed: 6
+  jumpForce: 13
   fallMultiplier: 15
   lowJumpMultiplier: 1.8
   highJumpMultiplier: 2
@@ -225,16 +225,19 @@ MonoBehaviour:
   wallCheckDistance: 0.6
   wallCheckHeight: 1
   wallSlideSpeed: -2
-  wallJumpHorizontalForce: 7
-  wallJumpVerticalForce: 5
   wallDetachCooldown: 0.12
-  wallJumpInputLock: 0.35
+  OldwallJumpHorizontalForce: 10
+  OldwallJumpVerticalForce: 12
+  OldwallJumpInputLock: 0.35
+  NewwallJumpHorizontalForce: 12
+  NewwallJumpVerticalForce: 12
+  NewwallJumpInputLock: 0.14
   groundCheck: {fileID: 1350386310103286853}
   groundCheckSize: {x: 0.5, y: 0.1}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  dashSpeed: 20
+  dashSpeed: 15
   dashDuration: 0.2
   dashCooldown: 1
   coyoteTime: 0.2
@@ -395,7 +398,7 @@ GameObject:
   m_Layer: 0
   m_Name: GroundCheck
   m_TagString: Untagged
-  m_Icon: {fileID: 8418204508859773708, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
