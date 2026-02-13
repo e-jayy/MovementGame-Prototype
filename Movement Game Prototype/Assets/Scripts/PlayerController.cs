@@ -57,6 +57,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float bounceEndBoost = 12f;
 
     private Rigidbody2D rb;
+    private Animator animator;
 
     private float horizontalInput;
     private float horizontalInputEffective;
@@ -122,6 +123,7 @@ public class PlayerController : MonoBehaviour
 
         sr = GetComponent<SpriteRenderer>();
         originalColor = sr.color;
+        animator = GetComponent<Animator>();
 
         if (grappleLineRenderer != null)
             grappleLineRenderer.enabled = false;
@@ -148,6 +150,8 @@ public class PlayerController : MonoBehaviour
         HandleCoyoteTime();
         HandleJumpBuffer();
         HandleDash();
+
+        HandleAnimation();
         
         HandleAbilityUnlocks();
 
@@ -535,6 +539,10 @@ public class PlayerController : MonoBehaviour
         {
             unlockedWallJump = true;
         }
+        else if (!PlayerManager.Instance.WallJumpUnlocked)
+        {
+            unlockedWallJump = false;
+        }
         UnlockWallJump();
 
         if (PlayerManager.Instance.DoubleJumpUnlocked)
@@ -558,8 +566,8 @@ public class PlayerController : MonoBehaviour
         if (unlockedWallJump)
         {
             wallJumpInputLock = 0.14f;
-            wallJumpHorizontalForce = 11f;
-            wallJumpVerticalForce = 13f;
+            wallJumpHorizontalForce = 9f;
+            wallJumpVerticalForce = 9f;
         }
         else if (!unlockedWallJump)
         {
@@ -645,5 +653,22 @@ public class PlayerController : MonoBehaviour
     private void TakeDamage()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void HandleAnimation()
+    {
+        if(facingDirection == 1)
+        {
+            sr.flipX = false;
+        }
+        else if(facingDirection == -1)
+        {
+            sr.flipX = true;
+        }
+        animator.SetFloat("Horizontal Speed", Mathf.Abs(InputManager.instance.MoveInput.x));
+        animator.SetBool("Horizontal Input", InputManager.instance.MoveInput.x != 0);
+        animator.SetFloat("Vertical Velocity", rb.linearVelocity.y);
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetBool("IsWallClinging", isWallClinging);
     }
 }
