@@ -214,19 +214,19 @@ MonoBehaviour:
   unlockedHook: 0
   unlockedWallJump: 0
   unlockedDoubleJump: 0
-  moveSpeed: 7
-  jumpForce: 10
-  fallMultiplier: 2.5
-  lowJumpMultiplier: 2
-  ascentMultiplier: 1.5
+  moveSpeed: 5
+  jumpForce: 9
+  fallMultiplier: 15
+  lowJumpMultiplier: 1.8
+  highJumpMultiplier: 2
   maxJumps: 1
-  maxFallSpeed: -18
+  maxFallSpeed: -15
   wallCheck: {fileID: 800755548540785703}
   wallCheckDistance: 0.6
   wallCheckHeight: 1
   wallSlideSpeed: -2
-  wallJumpHorizontalForce: 9
-  wallJumpVerticalForce: 7
+  wallJumpHorizontalForce: 7
+  wallJumpVerticalForce: 5
   wallDetachCooldown: 0.12
   wallJumpInputLock: 0.35
   groundCheck: {fileID: 1350386310103286853}

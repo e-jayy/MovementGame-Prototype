@@ -25563,12 +25563,8 @@ PrefabInstance:
     m_TransformParent: {fileID: 549527539}
     m_Modifications:
     - target: {fileID: 4404487109501981718, guid: 738cedff811d43143a31a14720afdd00, type: 3}
-      propertyPath: wallJumpVerticalForce
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4404487109501981718, guid: 738cedff811d43143a31a14720afdd00, type: 3}
-      propertyPath: wallJumpHorizontalForce
-      value: 7
+      propertyPath: ascentMultiplier
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6023688845023129983, guid: 738cedff811d43143a31a14720afdd00, type: 3}
       propertyPath: m_Icon

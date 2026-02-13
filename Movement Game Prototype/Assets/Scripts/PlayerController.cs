@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 15f;
     [SerializeField] private float fallMultiplier = 2.5f;
     [SerializeField] private float lowJumpMultiplier = 2f;
-    [SerializeField] private float ascentMultiplier = 1.5f;
+    [SerializeField] private float highJumpMultiplier = 1.5f;
     [SerializeField] private int maxJumps = 2;
 
     [Header("Fall Speed Cap")]
@@ -174,7 +174,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             HandleMovement();
-            ApplyBetterJump();
+            ApplyJump();
         }
     }
 
@@ -295,6 +295,14 @@ public class PlayerController : MonoBehaviour
         if (isGrounded) coyoteTimeCounter = coyoteTime;
         else coyoteTimeCounter -= Time.deltaTime;
     }
+    private void HandleJumpBuffer()
+    {
+        if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            jumpBufferCounter = 0f;
+        }
+    }
 
     private void HandleJump()
     {
@@ -330,38 +338,38 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HandleJumpBuffer()
+
+
+    private void ApplyJump()
+{
+    if (isRayActive || isGrapplingToTarget) return;
+
+    Vector2 velocity = rb.linearVelocity;
+
+    // Falling
+    if (velocity.y < 0f || InputManager.instance.JumpReleased)
     {
-        if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            jumpBufferCounter = 0f;
-        }
+        velocity.y -= fallMultiplier * Time.fixedDeltaTime;
+    }
+    // Rising and released
+    else if (velocity.y > 0f && !InputManager.instance.JumpBeingHeld)
+    {
+        velocity.y -= lowJumpMultiplier * Time.fixedDeltaTime;
+    }
+    // Rising and held
+    else if (velocity.y > 0f && InputManager.instance.JumpBeingHeld)
+    {
+        velocity.y -= highJumpMultiplier * Time.fixedDeltaTime;
     }
 
-    private void ApplyBetterJump()
+    // Clamp
+    if (velocity.y < maxFallSpeed)
     {
-        if (isRayActive || isGrapplingToTarget) return;
-
-        if (rb.linearVelocity.y < 0f)
-        {
-            rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime);
-        }
-        else if (rb.linearVelocity.y > 0f && !InputManager.instance.JumpBeingHeld)
-        {
-            rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (lowJumpMultiplier - 1f) * Time.fixedDeltaTime);
-        }
-        else if (rb.linearVelocity.y > 0f && InputManager.instance.JumpBeingHeld)
-        {
-            rb.linearVelocity += Vector2.up * (Physics2D.gravity.y * (ascentMultiplier - 1f) * Time.fixedDeltaTime);
-        }
-
-        // 👇 FALL SPEED CAP
-        if (rb.linearVelocity.y < maxFallSpeed)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
-        }
+        velocity.y = maxFallSpeed;
     }
+
+    rb.linearVelocity = velocity;
+}
     #endregion
 
     #region Dash
