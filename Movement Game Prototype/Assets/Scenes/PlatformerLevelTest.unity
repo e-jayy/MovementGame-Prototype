@@ -1281,7 +1281,7 @@ Tilemap:
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
-      m_AllTileFlags: 1073741826
+      m_AllTileFlags: 2
   - first: {x: 8, y: 4, z: 0}
     second:
       serializedVersion: 2
@@ -1401,7 +1401,7 @@ Tilemap:
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
-      m_AllTileFlags: 1073741826
+      m_AllTileFlags: 2
   - first: {x: 10, y: 6, z: 0}
     second:
       serializedVersion: 2
@@ -30593,7 +30593,7 @@ Tilemap:
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
-  m_Color: {r: 1, g: 1, b: 1, a: 0.14901961}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.09411765}
   m_Origin: {x: -49, y: -83, z: 0}
   m_Size: {x: 178, y: 107, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
@@ -31719,7 +31719,7 @@ Transform:
   m_GameObject: {fileID: 386700495}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.1500053, y: -15.787281, z: -10}
+  m_LocalPosition: {x: 22.76, y: -1.89, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -37392,11 +37392,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1043333591316015610, guid: 8ab7e799a5190f347a832b66bafdc0d6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 6409474304173585526, guid: 8ab7e799a5190f347a832b66bafdc0d6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8224074462612363803, guid: 8ab7e799a5190f347a832b66bafdc0d6, type: 3}
       propertyPath: m_Name
@@ -51056,7 +51056,7 @@ Transform:
   m_GameObject: {fileID: 1360459692}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.15, y: -15.08, z: -10}
+  m_LocalPosition: {x: 22.76, y: -1.89, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -51123,7 +51123,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 3, z: -10}
+  FollowOffset: {x: 0, y: 0, z: -10}
 --- !u!114 &1360459696
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51131,7 +51131,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1360459692}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f453f694addf4275988fac205bc91968, type: 3}
   m_Name: 
@@ -52024,9 +52024,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dashUnlocked: 1
-  wallJumpUnlocked: 0
-  doubleJumpUnlocked: 0
-  hookUnlocked: 0
+  wallJumpUnlocked: 1
+  doubleJumpUnlocked: 1
+  hookUnlocked: 1
 --- !u!1 &1534268197
 GameObject:
   m_ObjectHideFlags: 0
@@ -55262,6 +55262,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 549527539}
     m_Modifications:
+    - target: {fileID: 2573612543431382405, guid: 738cedff811d43143a31a14720afdd00, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4404487109501981718, guid: 738cedff811d43143a31a14720afdd00, type: 3}
       propertyPath: ascentMultiplier
       value: 2
@@ -55276,11 +55280,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7511382566953515612, guid: 738cedff811d43143a31a14720afdd00, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.15
+      value: 22.76
       objectReference: {fileID: 0}
     - target: {fileID: 7511382566953515612, guid: 738cedff811d43143a31a14720afdd00, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -18.08
+      value: -1.89
       objectReference: {fileID: 0}
     - target: {fileID: 7511382566953515612, guid: 738cedff811d43143a31a14720afdd00, type: 3}
       propertyPath: m_LocalPosition.z

@@ -291,7 +291,7 @@ public class PlayerController : MonoBehaviour
         wasGrounded = isGrounded;
         isGrounded = Physics2D.OverlapBox(groundCheck.position, groundCheckSize, 0f, groundLayer);
 
-        if (isGrounded) jumpsRemaining = maxJumps;
+        if (isGrounded || isWallClinging) jumpsRemaining = maxJumps;
 
         if (isGrounded && !wasGrounded)
         {
