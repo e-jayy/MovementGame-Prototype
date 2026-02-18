@@ -28,13 +28,6 @@ public class CrumblingPlatform : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (!isCrumbing && collision.CompareTag("Player"))
-        {
-            StartCoroutine(CrumbleRoutine());
-        }
-    }
 
     private System.Collections.IEnumerator CrumbleRoutine()
     {

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 800755548540785703}
   m_Layer: 0
   m_Name: WallCheck
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -113,7 +113,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -186,7 +186,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 2
+  m_GravityScale: 2.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -215,8 +215,8 @@ MonoBehaviour:
   unlockedWallJump: 0
   unlockedDoubleJump: 0
   moveSpeed: 6
-  jumpForce: 11
-  fallMultiplier: 15
+  jumpForce: 12
+  fallMultiplier: 20
   lowJumpMultiplier: 1.8
   highJumpMultiplier: 2
   maxJumps: 1
@@ -226,8 +226,8 @@ MonoBehaviour:
   wallCheckHeight: 1
   wallSlideSpeed: -2
   wallDetachCooldown: 0.12
-  OldwallJumpHorizontalForce: 8
-  OldwallJumpVerticalForce: 10
+  OldwallJumpHorizontalForce: 9
+  OldwallJumpVerticalForce: 7
   OldwallJumpInputLock: 0.35
   NewwallJumpHorizontalForce: 10
   NewwallJumpVerticalForce: 10
@@ -397,7 +397,7 @@ GameObject:
   - component: {fileID: 1350386310103286853}
   m_Layer: 0
   m_Name: GroundCheck
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
