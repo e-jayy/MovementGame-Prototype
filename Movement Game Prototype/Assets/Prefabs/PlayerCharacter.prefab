@@ -226,10 +226,10 @@ MonoBehaviour:
   wallCheckHeight: 1
   wallSlideSpeed: -2
   wallDetachCooldown: 0.12
-  OldwallJumpHorizontalForce: 9
+  OldwallJumpHorizontalForce: 10
   OldwallJumpVerticalForce: 7
   OldwallJumpInputLock: 0.28
-  NewwallJumpHorizontalForce: 10
+  NewwallJumpHorizontalForce: 12
   NewwallJumpVerticalForce: 10
   NewwallJumpInputLock: 0.14
   groundCheck: {fileID: 1350386310103286853}
