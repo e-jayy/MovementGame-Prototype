@@ -55,7 +55,8 @@ public class FallingPlatform : MonoBehaviour
         // Wait before respawn
         yield return new WaitForSeconds(1f);
 
-        // Reset color
+        // Reset color and gravity scale
+        rb.bodyType = RigidbodyType2D.Kinematic;
         sr.color = startColor;
     }
 }

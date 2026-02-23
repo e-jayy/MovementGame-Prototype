@@ -228,7 +228,7 @@ MonoBehaviour:
   wallDetachCooldown: 0.12
   OldwallJumpHorizontalForce: 9
   OldwallJumpVerticalForce: 7
-  OldwallJumpInputLock: 0.35
+  OldwallJumpInputLock: 0.28
   NewwallJumpHorizontalForce: 10
   NewwallJumpVerticalForce: 10
   NewwallJumpInputLock: 0.14
