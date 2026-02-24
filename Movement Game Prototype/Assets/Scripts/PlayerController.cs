@@ -4,6 +4,8 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    private float bouncePadDuration;
+    
     [Header("UnlockedAbilities")]
     //Add these values into a player manager singleton later
     [SerializeField] private bool unlockedDash;
@@ -147,6 +149,7 @@ public class PlayerController : MonoBehaviour
 
         if (wallCooldownTimer > 0f) wallCooldownTimer -= Time.deltaTime;
         if (wallJumpInputTimer > 0f) wallJumpInputTimer -= Time.deltaTime;
+        if (bouncePadDuration > 0f) bouncePadDuration -= Time.deltaTime;
         if (jumpBufferCounter > 0f) jumpBufferCounter -= Time.deltaTime;
         if (!canDash) dashCooldownTimer -= Time.deltaTime;
 
@@ -184,7 +187,7 @@ public class PlayerController : MonoBehaviour
             PerformDash();
         else
         {
-            HandleMovement();
+            HandleMovementLock();
             ApplyJump();
         }
     }
@@ -203,9 +206,12 @@ public class PlayerController : MonoBehaviour
             jumpBufferCounter = jumpBufferTime;
     }
 
-    private void HandleMovement()
+    private void HandleMovementLock()
     {
         if (wallJumpInputTimer > 0f) // Locks input when wall jumping
+            return;
+
+        if (bouncePadDuration > 0f) //Locks input after bounce pad
             return;
 
         if (isRayActive || isGrapplingToTarget)
@@ -666,6 +672,11 @@ public class PlayerController : MonoBehaviour
         {
             TakeDamage();
         }
+    }
+    
+    public void SetBouncePadDuration(float time)
+    {
+        bouncePadDuration = time;
     }
 
     private void TakeDamage()
