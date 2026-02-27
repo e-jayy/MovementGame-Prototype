@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class FallingPlatform : MonoBehaviour
 {
-    [Header("Timings")]
     [SerializeField] private float fallTime = 1f;     // Time it takes to turn black
+
+    [SerializeField] private Collider2D killTrigger;
 
     private SpriteRenderer sr;
     private Collider2D col;
@@ -13,12 +14,14 @@ public class FallingPlatform : MonoBehaviour
     private Color endColor = Color.black;
 
     private bool hasFallen = false;
+    public bool IsFalling { get; private set; }
 
     private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
+        killTrigger.enabled = false;
 
         rb.bodyType = RigidbodyType2D.Kinematic; // Prevent physics movement
         rb.gravityScale = 0f;
@@ -27,6 +30,14 @@ public class FallingPlatform : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!hasFallen && collision.collider.CompareTag("Player"))
+        {
+            StartCoroutine(fallRoutine());
+        }
+    }
+
+    public void TriggerFall()
+    {
+        if (!hasFallen)
         {
             StartCoroutine(fallRoutine());
         }
@@ -51,12 +62,20 @@ public class FallingPlatform : MonoBehaviour
         // Platform fall
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 1f;
+        IsFalling = true;
+        killTrigger.enabled = true;
 
-        // Wait before respawn
-        yield return new WaitForSeconds(1f);
+        // yield return new WaitForSeconds(1f);
 
-        // Reset color and gravity scale
+        // ResetPlatform;
+    }
+
+    public void ResetPlatform()
+    {
         rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.gravityScale = 0f;
         sr.color = startColor;
+        IsFalling = false;
+        killTrigger.enabled = false; 
     }
 }

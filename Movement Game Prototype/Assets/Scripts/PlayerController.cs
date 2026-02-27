@@ -679,7 +679,7 @@ public class PlayerController : MonoBehaviour
         bouncePadDuration = time;
     }
 
-    private void TakeDamage()
+    public void TakeDamage()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
