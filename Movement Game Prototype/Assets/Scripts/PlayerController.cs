@@ -99,7 +99,7 @@ public class PlayerController : MonoBehaviour
     private int wallDirection = 0;
     private float wallCooldownTimer;
     private bool justWallJumped = false;
-    private float wallJumpInputTimer = 0f;
+    public float wallJumpInputTimer = 0f;
 
     // Facing direction
     private int facingDirection = 1;

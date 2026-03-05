@@ -28,7 +28,7 @@ public class SideBouncePad : MonoBehaviour
             Rigidbody2D rb = other.GetComponent<Rigidbody2D>();
             
             // Reset horizontal velocity for consistent bounce
-            rb.linearVelocity = new Vector2(rb.linearVelocity.y, 0f);
+            rb.linearVelocity = Vector2.zero;
             
             // Apply upward impulse
             rb.AddForce(Vector2.up * bounceForceUp, ForceMode2D.Impulse);

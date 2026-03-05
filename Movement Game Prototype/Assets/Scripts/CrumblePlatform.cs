@@ -48,6 +48,15 @@ public class CrumblingPlatform : MonoBehaviour
         // Disable platform
         sr.enabled = false;
         col.enabled = false;
+        
+        if (transform.childCount > 0)
+        {
+            foreach (Transform child in transform)
+            {
+                child.GetComponent<SpriteRenderer>().enabled = false;
+                child.GetComponent<Collider2D>().enabled = false;
+            }
+        }
 
         // Wait before respawn
         yield return new WaitForSeconds(respawnTime);
@@ -56,6 +65,15 @@ public class CrumblingPlatform : MonoBehaviour
         sr.color = startColor;
         sr.enabled = true;
         col.enabled = true;
+        
+        if (transform.childCount > 0)
+        {
+            foreach (Transform child in transform)
+            {
+                child.GetComponent<SpriteRenderer>().enabled = true;
+                child.GetComponent<Collider2D>().enabled = true;
+            }
+        }
 
         isCrumbing = false;
     }

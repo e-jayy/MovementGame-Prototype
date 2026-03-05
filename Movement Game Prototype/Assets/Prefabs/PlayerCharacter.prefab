@@ -224,8 +224,8 @@ MonoBehaviour:
   wallClingMaterial: {fileID: 6200000, guid: 099b6721e420e1544a746eefcaaf46fb, type: 2}
   normalMaterial: {fileID: 6200000, guid: 84087fe57ec7f23499ec2e93e1691b68, type: 2}
   wallCheck: {fileID: 800755548540785703}
-  wallCheckDistance: 0.6
-  wallCheckHeight: 1
+  wallCheckDistance: 0.55
+  wallCheckHeight: 0.6
   wallSlideSpeed: -2
   wallDetachCooldown: 0.12
   OldwallJumpHorizontalForce: 10
