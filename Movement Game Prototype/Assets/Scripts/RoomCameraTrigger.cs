@@ -11,6 +11,10 @@ public class RoomCameraTrigger : MonoBehaviour
     [SerializeField] private int activePriority = 20;
     [SerializeField] private int inactivePriority = 10;
 
+    [Header("References")]
+    [SerializeField] private GameObject RoomLock;
+    public Transform respawnPoint;
+
     private void Start()
     {
         // Ensure this camera starts inactive
@@ -23,6 +27,19 @@ public class RoomCameraTrigger : MonoBehaviour
         if (!other.CompareTag("Player")) return;
 
         ActivateRoomCamera();
+
+        if(other.CompareTag("Player"))
+        {
+            if (respawnPoint != null)
+            {
+                PlayerManager.Instance.SetRespawnPoint(respawnPoint.position);
+            }
+
+            if (RoomLock != null)
+            {
+                RoomLock.SetActive(true);
+            }
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)

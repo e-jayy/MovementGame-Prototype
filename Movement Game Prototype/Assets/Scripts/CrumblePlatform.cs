@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class CrumblingPlatform : MonoBehaviour
 {
@@ -7,6 +9,8 @@ public class CrumblingPlatform : MonoBehaviour
     [SerializeField] private float respawnTime = 2f;     // Time before platform returns
 
     private SpriteRenderer sr;
+    [SerializeField] private Tilemap tm;
+    [SerializeField] private TilemapRenderer tmr;
     private Collider2D col;
 
     private Color startColor = Color.white;
@@ -34,27 +38,53 @@ public class CrumblingPlatform : MonoBehaviour
         isCrumbing = true;
 
         float t = 0f;
-        sr.color = startColor;
+
+        if (tm!= null)
+        {
+            tm.color = startColor;
+        }
+        else
+        {
+            sr.color = startColor;
+        }
 
         // Fade from white → black
         while (t < crumbleTime)
         {
             t += Time.deltaTime;
             float lerp = t / crumbleTime;
-            sr.color = Color.Lerp(startColor, endColor, lerp);
+
+            if (tm!= null)
+            {
+                tm.color = Color.Lerp(startColor, endColor, lerp);
+            }
+            else
+            {
+                sr.color = Color.Lerp(startColor, endColor, lerp);
+            }
             yield return null;
         }
 
         // Disable platform
-        sr.enabled = false;
+        if (tm!= null)
+        {
+            tmr.enabled = false;
+        }
+        else
+        {
+            sr.enabled = false;
+        }
         col.enabled = false;
         
         if (transform.childCount > 0)
         {
             foreach (Transform child in transform)
             {
-                child.GetComponent<SpriteRenderer>().enabled = false;
-                child.GetComponent<Collider2D>().enabled = false;
+                if(child.GetComponent<SpriteRenderer>() != null && child.GetComponent<Collider2D>() != null)
+                {
+                    child.GetComponent<SpriteRenderer>().enabled = false;
+                    child.GetComponent<Collider2D>().enabled = false;
+                }
             }
         }
 
@@ -62,16 +92,28 @@ public class CrumblingPlatform : MonoBehaviour
         yield return new WaitForSeconds(respawnTime);
 
         // Reset
-        sr.color = startColor;
-        sr.enabled = true;
+
+        if (tm!= null)
+        {
+            tm.color = startColor;
+            tmr.enabled = true;
+        }
+        else
+        {
+            sr.color = startColor;
+            sr.enabled = true;
+        }
         col.enabled = true;
         
         if (transform.childCount > 0)
         {
             foreach (Transform child in transform)
             {
-                child.GetComponent<SpriteRenderer>().enabled = true;
-                child.GetComponent<Collider2D>().enabled = true;
+                if(child.GetComponent<SpriteRenderer>() != null && child.GetComponent<Collider2D>() != null)
+                {
+                    child.GetComponent<SpriteRenderer>().enabled = true;
+                    child.GetComponent<Collider2D>().enabled = true;
+                }
             }
         }
 

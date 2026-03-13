@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -132,6 +131,15 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sr;
     private Color originalColor;
     private bool isRed = false;
+
+    private void Start()
+{
+    if (PlayerManager.Instance != null && PlayerManager.Instance.hasCustomRespawn)
+    {
+        transform.position = PlayerManager.Instance.respawnPosition;
+        PlayerManager.Instance.hasCustomRespawn = false;
+    }
+}
 
     private void Awake()
     {
@@ -688,7 +696,7 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        PlayerManager.Instance.ReloadScene();
     }
 
     private void HandleAnimation()
