@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Cinemachine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class RoomCameraTrigger : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class RoomCameraTrigger : MonoBehaviour
     [Header("Priority Settings")]
     [SerializeField] private int activePriority = 20;
     [SerializeField] private int inactivePriority = 10;
-
+    [SerializeField] private float LockRoomDelay = 0.5f;  
     [Header("References")]
     [SerializeField] private GameObject RoomLock;
     public Transform respawnPoint;
@@ -37,9 +38,15 @@ public class RoomCameraTrigger : MonoBehaviour
 
             if (RoomLock != null)
             {
-                RoomLock.SetActive(true);
+                StartCoroutine(LockRoom());
             }
         }
+    }
+
+    private IEnumerator LockRoom()
+    {
+        yield return new WaitForSeconds(LockRoomDelay);
+        RoomLock.SetActive(true);
     }
 
     private void OnTriggerExit2D(Collider2D other)

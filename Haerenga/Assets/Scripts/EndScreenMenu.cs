@@ -4,6 +4,7 @@ public class EndScreenMenu : MonoBehaviour
 {
     public void OnStartPress()
     {
+        SceneController.Instance.ResetSpawnData();
         SceneController.Instance.LoadScene("Start_Scene");
     }
 

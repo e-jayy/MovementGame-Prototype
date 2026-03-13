@@ -22,6 +22,12 @@ public class SceneController : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+
+    public void ResetSpawnData()
+    {
+        hasCustomRespawn = false;
+        respawnPosition = Vector2.zero;
+    }
     public void LoadScene(string sceneName)
     {
         StartCoroutine(LoadSceneCoroutine(sceneName));
