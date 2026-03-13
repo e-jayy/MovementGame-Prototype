@@ -137,6 +137,12 @@ public class MenuManager : MonoBehaviour
         Unpause();
     }
 
+    public void OnMenuPress()
+    {
+        Unpause();
+        SceneController.Instance.LoadScene("Start_Scene");
+    }
+
     #endregion
 
     #region Settings Menu Button Functions

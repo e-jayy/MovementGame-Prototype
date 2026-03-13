@@ -134,10 +134,10 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
 {
-    if (PlayerManager.Instance != null && PlayerManager.Instance.hasCustomRespawn)
+    if (SceneController.Instance != null && SceneController.Instance.hasCustomRespawn)
     {
-        transform.position = PlayerManager.Instance.respawnPosition;
-        PlayerManager.Instance.hasCustomRespawn = false;
+        transform.position = SceneController.Instance.respawnPosition;
+        SceneController.Instance.hasCustomRespawn = false;
     }
 }
 
@@ -696,7 +696,7 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage()
     {
-        PlayerManager.Instance.ReloadScene();
+        SceneController.Instance.ReloadScene();
     }
 
     private void HandleAnimation()

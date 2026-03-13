@@ -32,7 +32,7 @@ public class RoomCameraTrigger : MonoBehaviour
         {
             if (respawnPoint != null)
             {
-                PlayerManager.Instance.SetRespawnPoint(respawnPoint.position);
+                SceneController.Instance.SetRespawnPoint(respawnPoint.position);
             }
 
             if (RoomLock != null)
