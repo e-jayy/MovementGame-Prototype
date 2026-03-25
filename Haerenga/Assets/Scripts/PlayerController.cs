@@ -4,6 +4,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private float bouncePadDuration;
+    private float bouncePadDurationHorizontal;
+    private bool bounceLock;
     
     [Header("Unlocked Abilities")]
     //Add these values into a player manager singleton later
@@ -157,17 +159,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
-            StartCoroutine(BounceRoutine());
-
-        if (wallCooldownTimer > 0f) wallCooldownTimer -= Time.deltaTime;
-        if (wallJumpInputTimer > 0f) wallJumpInputTimer -= Time.deltaTime;
-        if (bouncePadDuration > 0f) bouncePadDuration -= Time.deltaTime;
-        if (jumpBufferCounter > 0f) jumpBufferCounter -= Time.deltaTime;
-        if (!canDash) dashCooldownTimer -= Time.deltaTime;
-
-        if (justWallJumped && wallJumpInputTimer <= 0f)
-            justWallJumped = false;
+        HandleTimers();
 
         GetHorizontalInput();
         CheckGround();
@@ -182,7 +174,10 @@ public class PlayerController : MonoBehaviour
         
         HandleAbilityUnlocks();
 
-        horizontalInputEffective = (wallJumpInputTimer > 0f) ? 0f : horizontalInput; //If the wall-jump input lock timer is still running, ignore horizontal input. Otherwise, use the players real horizontal input
+        SetBounceLock();
+
+        horizontalInputEffective = (wallJumpInputTimer > 0f) ? 0f : horizontalInput;
+        //If the wall-jump input lock timer is still running, ignore horizontal input. Otherwise, use the players real horizontal input
 
         if (!isDashing)
         {
@@ -201,8 +196,24 @@ public class PlayerController : MonoBehaviour
         else
         {
             HandleMovementLock();
-            ApplyJump();
+            //ApplyJump();
         }
+    }
+
+    private void HandleTimers()
+    {
+        if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
+            StartCoroutine(BounceRoutine());
+
+        if (wallCooldownTimer >= 0f) wallCooldownTimer -= Time.deltaTime;
+        if (wallJumpInputTimer >= 0f) wallJumpInputTimer -= Time.deltaTime;
+        if (bouncePadDuration >= 0f) bouncePadDuration -= Time.deltaTime;
+        if (bouncePadDurationHorizontal >= 0f) bouncePadDurationHorizontal -= Time.deltaTime;
+        if (jumpBufferCounter >= 0f) jumpBufferCounter -= Time.deltaTime;
+        if (!canDash) dashCooldownTimer -= Time.deltaTime;
+
+        if (justWallJumped && wallJumpInputTimer <= 0f)
+            justWallJumped = false;
     }
 
     private void GetHorizontalInput()
@@ -224,7 +235,7 @@ public class PlayerController : MonoBehaviour
         if (wallJumpInputTimer > 0f) // Locks input when wall jumping
             return;
 
-        if (bouncePadDuration > 0f) //Locks input after bounce pad
+        if (bounceLock) //Locks input after bounce pad
             return;
 
         if (isRayActive || isGrapplingToTarget)
@@ -363,42 +374,46 @@ public class PlayerController : MonoBehaviour
 
         if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+            if(bouncePadDuration <= 0f)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+                Debug.Log("Jump released, cutting jump height");
+            }
         }
     }
 
 
 
-    private void ApplyJump()
-{
-    if (isRayActive || isGrapplingToTarget) return;
+//     private void ApplyJump()
+// {
+//     if (isRayActive || isGrapplingToTarget) return;
 
-    Vector2 velocity = rb.linearVelocity;
+//     Vector2 velocity = rb.linearVelocity;
 
-    // Falling
-    if (velocity.y < 0f || InputManager.instance.JumpReleased)
-    {
-        velocity.y -= fallMultiplier * Time.fixedDeltaTime;
-    }
-    // Rising and released
-    else if (velocity.y > 0f && !InputManager.instance.JumpBeingHeld)
-    {
-        velocity.y -= lowJumpMultiplier * Time.fixedDeltaTime;
-    }
-    // Rising and held
-    else if (velocity.y > 0f && InputManager.instance.JumpBeingHeld)
-    {
-        velocity.y -= highJumpMultiplier * Time.fixedDeltaTime;
-    }
+//     // Falling
+//     if (velocity.y < 0f || InputManager.instance.JumpReleased)
+//     {
+//         velocity.y -= fallMultiplier * Time.fixedDeltaTime;
+//     }
+//     // Rising and released
+//     else if (velocity.y > 0f && !InputManager.instance.JumpBeingHeld)
+//     {
+//         velocity.y -= lowJumpMultiplier * Time.fixedDeltaTime;
+//     }
+//     // Rising and held
+//     else if (velocity.y > 0f && InputManager.instance.JumpBeingHeld)
+//     {
+//         velocity.y -= highJumpMultiplier * Time.fixedDeltaTime;
+//     }
 
-    // Clamp
-    if (velocity.y < maxFallSpeed)
-    {
-        velocity.y = maxFallSpeed;
-    }
+//     // Clamp
+//     if (velocity.y < maxFallSpeed)
+//     {
+//         velocity.y = maxFallSpeed;
+//     }
 
-    rb.linearVelocity = velocity;
-}
+//     rb.linearVelocity = velocity;
+// }
     #endregion
 
     #region Dash
@@ -692,6 +707,22 @@ public class PlayerController : MonoBehaviour
     public void SetBouncePadDuration(float time)
     {
         bouncePadDuration = time;
+    }
+
+    public void SetBouncePadDurationHorizontal(float time)
+    {
+        bouncePadDurationHorizontal = time;
+    }
+
+    public void SetBounceLock()
+    {
+        if (bouncePadDurationHorizontal >= 0f)
+        {
+            bounceLock = true;
+        } else
+        {
+            bounceLock = false;
+        }
     }
 
     public void TakeDamage()

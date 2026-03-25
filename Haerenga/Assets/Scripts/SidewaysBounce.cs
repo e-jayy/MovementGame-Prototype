@@ -20,8 +20,9 @@ public class SideBouncePad : MonoBehaviour
         
         if (player != null)
         {
-            player.SetBouncePadDuration(bouncePadTimer);
+            player.SetBouncePadDurationHorizontal(bouncePadTimer);
         }
+        
         
         if (other.CompareTag("Player"))
         {   
