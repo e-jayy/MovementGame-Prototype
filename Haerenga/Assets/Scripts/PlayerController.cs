@@ -380,6 +380,11 @@ public class PlayerController : MonoBehaviour
                 Debug.Log("Jump released, cutting jump height");
             }
         }
+
+        if (rb.linearVelocity.y < maxFallSpeed)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
+        }  
     }
 
 
