@@ -215,10 +215,11 @@ MonoBehaviour:
   unlockedWallJump: 0
   unlockedDoubleJump: 0
   moveSpeed: 6
-  jumpForce: 13
-  fallMultiplier: 1.005
+  jumpForce: 13.5
+  fallMultiplier: 1.0075
   maxJumps: 1
-  maxFallSpeed: -10
+  maxFallSpeed: -12
+  lowJumpMultiplier: 0.65
   wallClingMaterial: {fileID: 6200000, guid: 099b6721e420e1544a746eefcaaf46fb, type: 2}
   normalMaterial: {fileID: 6200000, guid: 84087fe57ec7f23499ec2e93e1691b68, type: 2}
   wallCheck: {fileID: 800755548540785703}

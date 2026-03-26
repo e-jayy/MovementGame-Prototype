@@ -23,9 +23,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpForce = 15f;
     [SerializeField] private float fallMultiplier = 0.5f;
     [SerializeField] private int maxJumps = 2;
+    private bool shouldJump;
+    private bool shouldWallJump;
 
     [Header("Fall Speed Cap")]
-    [SerializeField] private float maxFallSpeed = -20f;
+    [SerializeField] private float maxFallSpeed = -12f;
+    [SerializeField] private float lowJumpMultiplier = 0.5f;    
 
     [Header("Wall Cling")]
     [SerializeField] private PhysicsMaterial2D wallClingMaterial;
@@ -157,8 +160,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(rb.linearVelocity.y);
-
         HandleTimers();
 
         GetHorizontalInput();
@@ -196,7 +197,6 @@ public class PlayerController : MonoBehaviour
         else
         {
             HandleMovementLock();
-            //ApplyJump();
         }
     }
 
@@ -346,8 +346,6 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
-        if (isRayActive || isGrapplingToTarget) return;
-
         if (InputManager.instance.JumpJustPressed && isWallClinging)
         {
             rb.linearVelocity = new Vector2(-wallDirection * wallJumpHorizontalForce, wallJumpVerticalForce);
@@ -374,19 +372,97 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (InputManager.instance.JumpReleased || rb.linearVelocity.y < 0f)
+        if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
         {
             if(bouncePadDuration <= 0f)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * lowJumpMultiplier);
+                Debug.Log("Jump released, cutting jump height");
             }
+        }
+
+        if (rb.linearVelocity.y < 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
         }
 
         if (rb.linearVelocity.y < maxFallSpeed)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
-        }  
+        }
     }
+
+    // private void HandleJump()
+    // {
+    //     if (InputManager.instance.JumpJustPressed && isWallClinging)
+    //     {
+    //         shouldWallJump = true;
+    //         justWallJumped = true;
+    //         wallJumpInputTimer = wallJumpInputLock;
+    //         wallCooldownTimer = wallDetachCooldown;
+    //         isWallClinging = false;
+    //         return;
+    //     }
+
+    //     if (InputManager.instance.JumpJustPressed)
+    //     {
+    //         if (coyoteTimeCounter > 0f && jumpsRemaining > 0)
+    //         {
+    //             shouldJump = true;
+    //             jumpsRemaining--;
+    //             coyoteTimeCounter = 0f;
+    //         }
+    //         else if (unlockedDoubleJump && jumpsRemaining > 0 && !isGrounded)
+    //         {
+    //             shouldJump = true;
+    //             jumpsRemaining--;
+    //         }
+    //     }
+
+    //     // Early jump release for variable height
+    //     // if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
+    //     //     {
+    //     //         rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
+    //     //     }
+    // }
+
+    // private void ApplyJump()
+    // {
+    //     if (isRayActive || isGrapplingToTarget) return;
+
+    //     // Apply wall jump
+    //     if (shouldWallJump)
+    //     {
+    //         rb.linearVelocity = new Vector2(-wallDirection * wallJumpHorizontalForce, wallJumpVerticalForce);
+    //         shouldWallJump = false;
+    //     }
+        
+    //     // Apply regular jump
+    //     if (shouldJump)
+    //     {
+    //         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+    //         shouldJump = false;
+    //     }
+
+
+    //     // Falling
+    //     if (rb.linearVelocity.y < 0f && InputManager.instance.JumpBeingHeld)
+    //     {
+    //         rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
+    //     }
+
+    //     // Rising and released
+    //     else if (rb.linearVelocity.y > 0f && !InputManager.instance.JumpBeingHeld)
+    //     {
+    //         rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
+    //     }
+
+    //     // Clamp max fall speed
+    //     if (rb.linearVelocity.y < maxFallSpeed)
+    //     {
+    //         rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
+    //     }
+    // }
 
     #endregion
 
