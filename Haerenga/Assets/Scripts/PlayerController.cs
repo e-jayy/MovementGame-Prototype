@@ -21,9 +21,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 15f;
-    [SerializeField] private float fallMultiplier = 2.5f;
-    [SerializeField] private float lowJumpMultiplier = 2f;
-    [SerializeField] private float highJumpMultiplier = 1.5f;
+    [SerializeField] private float fallMultiplier = 0.5f;
     [SerializeField] private int maxJumps = 2;
 
     [Header("Fall Speed Cap")]
@@ -159,6 +157,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log(rb.linearVelocity.y);
+
         HandleTimers();
 
         GetHorizontalInput();
@@ -346,6 +346,8 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJump()
     {
+        if (isRayActive || isGrapplingToTarget) return;
+
         if (InputManager.instance.JumpJustPressed && isWallClinging)
         {
             rb.linearVelocity = new Vector2(-wallDirection * wallJumpHorizontalForce, wallJumpVerticalForce);
@@ -372,12 +374,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (InputManager.instance.JumpReleased && rb.linearVelocity.y > 0f)
+        if (InputManager.instance.JumpReleased || rb.linearVelocity.y < 0f)
         {
             if(bouncePadDuration <= 0f)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-                Debug.Log("Jump released, cutting jump height");
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
             }
         }
 
@@ -387,38 +388,6 @@ public class PlayerController : MonoBehaviour
         }  
     }
 
-
-
-//     private void ApplyJump()
-// {
-//     if (isRayActive || isGrapplingToTarget) return;
-
-//     Vector2 velocity = rb.linearVelocity;
-
-//     // Falling
-//     if (velocity.y < 0f || InputManager.instance.JumpReleased)
-//     {
-//         velocity.y -= fallMultiplier * Time.fixedDeltaTime;
-//     }
-//     // Rising and released
-//     else if (velocity.y > 0f && !InputManager.instance.JumpBeingHeld)
-//     {
-//         velocity.y -= lowJumpMultiplier * Time.fixedDeltaTime;
-//     }
-//     // Rising and held
-//     else if (velocity.y > 0f && InputManager.instance.JumpBeingHeld)
-//     {
-//         velocity.y -= highJumpMultiplier * Time.fixedDeltaTime;
-//     }
-
-//     // Clamp
-//     if (velocity.y < maxFallSpeed)
-//     {
-//         velocity.y = maxFallSpeed;
-//     }
-
-//     rb.linearVelocity = velocity;
-// }
     #endregion
 
     #region Dash
