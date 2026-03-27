@@ -3,9 +3,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private float bouncePadDuration;
-    private float bouncePadDurationHorizontal;
-    private bool bounceLock;
     
     [Header("Unlocked Abilities")]
     //Add these values into a player manager singleton later
@@ -25,19 +22,23 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int maxJumps = 2;
     private bool shouldJump;
     private bool shouldWallJump;
+    private float bouncePadDuration;
+    private float bouncePadDurationHorizontal;
+    private bool bounceLock;
 
-    [Header("Fall Speed Cap")]
-    [SerializeField] private float maxFallSpeed = -12f;
-    [SerializeField] private float lowJumpMultiplier = 0.5f;    
+    [SerializeField] private float lowJumpMultiplier = 0.5f;  
+    [SerializeField] private float maxFallSpeed = -12f;  
 
     [Header("Wall Cling")]
     [SerializeField] private PhysicsMaterial2D wallClingMaterial;
     [SerializeField] private PhysicsMaterial2D normalMaterial;
+    private float wallClingStamina;
+    [SerializeField] private float wallClingStaminaRegenRate = 1f;
+    [SerializeField] private float maxWallClingStamina = 3f;
     
     [SerializeField] private Transform wallCheck;
     [SerializeField] private float wallCheckDistance = 0.6f;
     [SerializeField] private float wallCheckHeight = 0.5f;
-    [SerializeField] private float wallSlideSpeed = -2f;
     private float wallJumpHorizontalForce;
     private float wallJumpVerticalForce;
     private float wallJumpInputLock;
@@ -149,10 +150,11 @@ public class PlayerController : MonoBehaviour
         coll = GetComponent<Collider2D>();
         rb = GetComponent<Rigidbody2D>();
         originalGravityScale = rb.gravityScale;
-
         sr = GetComponent<SpriteRenderer>();
         originalColor = sr.color;
         animator = GetComponent<Animator>();
+
+        wallClingStamina = maxWallClingStamina;
 
         if (grappleLineRenderer != null)
             grappleLineRenderer.enabled = false;
@@ -170,6 +172,7 @@ public class PlayerController : MonoBehaviour
         HandleCoyoteTime();
         HandleJumpBuffer();
         HandleDash();
+        HandleWallClingStamina();
 
         HandleAnimation();
         
@@ -247,7 +250,7 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
     }
 
-    #region Wall
+    #region Wall Cling Methods
     private void CheckWall()
     {
         RaycastHit2D hitRight = Physics2D.BoxCast(
@@ -299,18 +302,47 @@ public class PlayerController : MonoBehaviour
         if (isTouchingWall && !isGrounded && pressingIntoWall)
         {
             isWallClinging = true;
-            facingDirection = -wallDirection;
-
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                Mathf.Max(rb.linearVelocity.y, wallSlideSpeed)
-            );
-
-            
+            facingDirection = -wallDirection;      
         }
         else
         {
             isWallClinging = false;
+        }
+    }
+
+    private void HandleWallClingStamina()
+    {
+        if (isWallClinging)
+        {
+            // Drain stamina
+            wallClingStamina -= Time.deltaTime;
+            
+            // Out of stamina - fall off wall
+            if (wallClingStamina <= 0f)
+            {
+                wallClingStamina = 0f;
+                coll.sharedMaterial = normalMaterial;
+            }
+        }
+        else
+        {
+            // Regenerate stamina when not wall clinging
+            wallClingStamina += wallClingStaminaRegenRate * Time.deltaTime;
+            
+            // Clamp to max
+            if (wallClingStamina >= maxWallClingStamina)
+            {
+                wallClingStamina = maxWallClingStamina;
+            }
+        }
+
+        if (wallClingStamina > 0f)
+        {
+            coll.sharedMaterial = wallClingMaterial;
+        }
+        else
+        {
+            coll.sharedMaterial = normalMaterial;
         }
     }
     #endregion

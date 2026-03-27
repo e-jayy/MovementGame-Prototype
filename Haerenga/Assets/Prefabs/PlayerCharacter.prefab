@@ -135,7 +135,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: 84087fe57ec7f23499ec2e93e1691b68, type: 2}
+  m_Material: {fileID: 6200000, guid: 099b6721e420e1544a746eefcaaf46fb, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -218,13 +218,15 @@ MonoBehaviour:
   jumpForce: 13.5
   fallMultiplier: 1.0075
   maxJumps: 1
-  maxFallSpeed: -12
   lowJumpMultiplier: 0.65
+  maxFallSpeed: -12
   wallClingMaterial: {fileID: 6200000, guid: 099b6721e420e1544a746eefcaaf46fb, type: 2}
   normalMaterial: {fileID: 6200000, guid: 84087fe57ec7f23499ec2e93e1691b68, type: 2}
+  wallClingStaminaRegenRate: 0.75
+  maxWallClingStamina: 1
   wallCheck: {fileID: 800755548540785703}
-  wallCheckDistance: 0.55
-  wallCheckHeight: 0.6
+  wallCheckDistance: 0.495
+  wallCheckHeight: 1
   wallSlideSpeed: -2
   wallDetachCooldown: 0.12
   OldwallJumpHorizontalForce: 10
