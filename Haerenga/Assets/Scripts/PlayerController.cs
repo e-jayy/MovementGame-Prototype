@@ -409,11 +409,11 @@ public class PlayerController : MonoBehaviour
             if(bouncePadDuration <= 0f)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * lowJumpMultiplier);
-                Debug.Log("Jump released, cutting jump height");
+                //Debug.Log("Jump released, cutting jump height");
             }
         }
 
-        if (rb.linearVelocity.y < 0f)
+        if (rb.linearVelocity.y < 0f && !isWallClinging)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * fallMultiplier);
         }
@@ -423,7 +423,9 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, maxFallSpeed);
         }
     }
+    #endregion
 
+    #region oldJump
     // private void HandleJump()
     // {
     //     if (InputManager.instance.JumpJustPressed && isWallClinging)

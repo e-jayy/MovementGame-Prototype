@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 6023688845023129983}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.05, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -218,16 +218,15 @@ MonoBehaviour:
   jumpForce: 13.5
   fallMultiplier: 1.0075
   maxJumps: 1
-  lowJumpMultiplier: 0.65
+  lowJumpMultiplier: 0.575
   maxFallSpeed: -12
   wallClingMaterial: {fileID: 6200000, guid: 099b6721e420e1544a746eefcaaf46fb, type: 2}
   normalMaterial: {fileID: 6200000, guid: 84087fe57ec7f23499ec2e93e1691b68, type: 2}
   wallClingStaminaRegenRate: 0.75
   maxWallClingStamina: 1
   wallCheck: {fileID: 800755548540785703}
-  wallCheckDistance: 0.495
-  wallCheckHeight: 1
-  wallSlideSpeed: -2
+  wallCheckDistance: 0.48
+  wallCheckHeight: 1.1
   wallDetachCooldown: 0.12
   OldwallJumpHorizontalForce: 10
   OldwallJumpVerticalForce: 7
