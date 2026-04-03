@@ -780,6 +780,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+
+    #region Damake and Death
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Damage"))
+        {
+            TakeDamage();
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.collider.CompareTag("Damage"))
@@ -788,6 +798,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     
+    #endregion
     public void SetBouncePadDuration(float time)
     {
         bouncePadDuration = time;
