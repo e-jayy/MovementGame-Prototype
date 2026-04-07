@@ -242,8 +242,8 @@ MonoBehaviour:
   dashSpeed: 20
   dashDuration: 0.15
   dashCooldown: 1
-  coyoteTime: 0.2
-  jumpBufferTime: 0.2
+  coyoteTime: 0.1
+  jumpBufferTime: 0.1
   bounceLayer:
     serializedVersion: 2
     m_Bits: 256
