@@ -11,9 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool unlockedWallJump;
     [SerializeField] private bool unlockedDoubleJump;
 
-    [Header("Climbing Settings")]
-    private bool isClimbing = false;
-
+    
     
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 7f;
@@ -669,25 +667,6 @@ public class PlayerController : MonoBehaviour
     // }
     #endregion
 
-    #region Climb Function
-    private void HandleClimb()
-    {
-        if (isClimbing)
-        {
-            float verticalInput = InputManager.instance.MoveInput.y;
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, verticalInput * moveSpeed);
-            rb.gravityScale = 0f;
-
-            if (InputManager.instance.JumpJustPressed)
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-                //isClimbing = false;
-            }
-        }
-    }
-
-    #endregion
-
     #region Unlock Ability Functions
 
     public void HandleAbilityUnlocks()
@@ -740,14 +719,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        Debug.Log("Trigger with: " + other.name);
+        //Debug.Log("Trigger with: " + other.name);
         //Debug.Log($"Trigger stay with {other.name}, layer = {other.gameObject.layer}");
-
-        if (other.CompareTag("Vine"))
-        {
-            isClimbing = true;
-        }
-
         if (!isRed) return;
 
         if (other.gameObject.layer == 8)
