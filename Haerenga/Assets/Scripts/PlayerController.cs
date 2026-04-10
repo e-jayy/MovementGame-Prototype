@@ -11,7 +11,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool unlockedWallJump;
     [SerializeField] private bool unlockedDoubleJump;
 
-    
+    [Header("Climbing Settings")]
+    private bool isClimbing = false;
+
     
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 7f;
@@ -205,8 +207,8 @@ public class PlayerController : MonoBehaviour
 
     private void HandleTimers()
     {
-        if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
-            StartCoroutine(BounceRoutine());
+        // if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
+        //     StartCoroutine(BounceRoutine());
 
         if (wallCooldownTimer >= 0f) wallCooldownTimer -= Time.deltaTime;
         if (wallJumpInputTimer >= 0f) wallJumpInputTimer -= Time.deltaTime;
@@ -652,19 +654,38 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Bounce Function
-    private IEnumerator BounceRoutine()
-    {
-        isRed = true;
-        sr.color = Color.red;
-        nextBounceTime = Time.time + bounceCooldown;
+    // private IEnumerator BounceRoutine()
+    // {
+    //     isRed = true;
+    //     sr.color = Color.red;
+    //     nextBounceTime = Time.time + bounceCooldown;
         
-        Debug.Log("isRed = " + isRed);
+    //     Debug.Log("isRed = " + isRed);
 
-        yield return new WaitForSeconds(0.5f);
+    //     yield return new WaitForSeconds(0.5f);
 
-        sr.color = originalColor;
-        isRed = false;
+    //     sr.color = originalColor;
+    //     isRed = false;
+    // }
+    #endregion
+
+    #region Climb Function
+    private void HandleClimb()
+    {
+        if (isClimbing)
+        {
+            float verticalInput = InputManager.instance.MoveInput.y;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, verticalInput * moveSpeed);
+            rb.gravityScale = 0f;
+
+            if (InputManager.instance.JumpJustPressed)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+                //isClimbing = false;
+            }
+        }
     }
+
     #endregion
 
     #region Unlock Ability Functions
@@ -719,8 +740,14 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        //Debug.Log("Trigger with: " + other.name);
+        Debug.Log("Trigger with: " + other.name);
         //Debug.Log($"Trigger stay with {other.name}, layer = {other.gameObject.layer}");
+
+        if (other.CompareTag("Vine"))
+        {
+            isClimbing = true;
+        }
+
         if (!isRed) return;
 
         if (other.gameObject.layer == 8)
