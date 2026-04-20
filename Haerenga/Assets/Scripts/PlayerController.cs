@@ -69,11 +69,34 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float coyoteTime = 0.2f;
     [SerializeField] private float jumpBufferTime = 0.2f;
 
+    // Grapple
+    [Header("Grapple Settings")]
+    [SerializeField] private float directionalRayDistance = 10f;
+    [SerializeField] private float directionalRayDuration = 1f;
+    [SerializeField] private LayerMask grappleLayer;
+    [SerializeField] private float grappleDelay = 0.2f;
+    [SerializeField] private float grappleLerpDuration = 0.3f;
+    [SerializeField] private float grappleEndBoost = 8f;
+    [SerializeField] private float grappleCooldown = 0.3f;
+    [SerializeField] private LineRenderer grappleLineRenderer;
+
     [Header("Bounce Settings")]
     [SerializeField] private LayerMask bounceLayer;
     [SerializeField] private float bounceCooldown = 1f;
     private float nextBounceTime = 0f;
     [SerializeField] private float bounceEndBoost = 12f;
+
+    private RaycastHit2D directionalRayHit;
+    private bool isRayActive;
+    private float rayTimer;
+    private float originalGravityScale;
+    private bool isGrapplingToTarget;
+    private bool isGrappling;
+    private Vector2 grappleStartPos;
+    private Vector2 grappleTargetPos;
+    private float grappleLerpTimer;
+    private bool canGrapple = true;
+    private float grappleCooldownTimer;
 
     private Rigidbody2D rb;
     private Collider2D coll;
@@ -107,29 +130,6 @@ public class PlayerController : MonoBehaviour
     // Facing direction
     private int facingDirection = 1;
     private Vector2 rayDirection;
-
-    // Grapple
-    [Header("Directional Raycast")]
-    [SerializeField] private float directionalRayDistance = 10f;
-    [SerializeField] private float directionalRayDuration = 1f;
-    [SerializeField] private LayerMask grappleLayer;
-    [SerializeField] private float grappleDelay = 0.2f;
-    [SerializeField] private float grappleLerpDuration = 0.3f;
-    [SerializeField] private float grappleEndBoost = 8f;
-    [SerializeField] private float grappleCooldown = 0.3f;
-    [SerializeField] private LineRenderer grappleLineRenderer;
-
-    private RaycastHit2D directionalRayHit;
-    private bool isRayActive;
-    private float rayTimer;
-    private float originalGravityScale;
-    private bool isGrapplingToTarget;
-    private bool isGrappling;
-    private Vector2 grappleStartPos;
-    private Vector2 grappleTargetPos;
-    private float grappleLerpTimer;
-    private bool canGrapple = true;
-    private float grappleCooldownTimer;
 
     // Sprite flash
     private SpriteRenderer sr;

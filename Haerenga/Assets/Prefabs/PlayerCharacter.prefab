@@ -244,12 +244,6 @@ MonoBehaviour:
   dashCooldown: 1
   coyoteTime: 0.1
   jumpBufferTime: 0.1
-  bounceLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  bounceCooldown: 1
-  bounceEndBoost: 12
-  wallJumpInputTimer: 0
   directionalRayDistance: 6
   directionalRayDuration: 0.4
   grappleLayer:
@@ -257,9 +251,15 @@ MonoBehaviour:
     m_Bits: 128
   grappleDelay: 0.2
   grappleLerpDuration: 0.2
-  grappleEndBoost: 8
+  grappleEndBoost: 10
   grappleCooldown: 0.5
   grappleLineRenderer: {fileID: 7994139911982639681}
+  bounceLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  bounceCooldown: 1
+  bounceEndBoost: 12
+  wallJumpInputTimer: 0
 --- !u!120 &7994139911982639681
 LineRenderer:
   serializedVersion: 2
