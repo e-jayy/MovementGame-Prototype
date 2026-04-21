@@ -244,7 +244,7 @@ MonoBehaviour:
   dashCooldown: 1
   coyoteTime: 0.1
   jumpBufferTime: 0.1
-  directionalRayDistance: 6
+  directionalRayDistance: 5
   directionalRayDuration: 0.4
   grappleLayer:
     serializedVersion: 2

@@ -5,7 +5,7 @@ public class StartMenu : MonoBehaviour
 {
     public void OnStartPress()
     {
-        SceneController.Instance.LoadScene("Level_Tutorial_Scene");
+        SceneController.Instance.LoadScene("Level1_Tutorial");
     }
 
     public void OnQuitPress()

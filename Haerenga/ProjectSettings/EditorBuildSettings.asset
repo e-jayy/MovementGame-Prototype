@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Level1_Tutorial.unity
     guid: cf5db78e1c04dfe49ba34bebaa5a1b62
   - enabled: 1
+    path: Assets/Scenes/Level2_Overgrown.unity
+    guid: 09d152a7ebc9ed74893e86101b83c87b
+  - enabled: 1
     path: Assets/Scenes/End_Scene.unity
     guid: bbbdab5cbef61174a9cd7121254c624e
   m_configObjects:
