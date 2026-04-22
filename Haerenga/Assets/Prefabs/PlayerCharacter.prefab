@@ -225,7 +225,7 @@ MonoBehaviour:
   wallClingStaminaRegenRate: 0.75
   maxWallClingStamina: 1
   wallCheck: {fileID: 800755548540785703}
-  wallCheckDistance: 0.48
+  wallCheckDistance: 48
   wallCheckHeight: 1.1
   wallDetachCooldown: 0.12
   OldwallJumpHorizontalForce: 10
