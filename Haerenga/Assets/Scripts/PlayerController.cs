@@ -136,6 +136,10 @@ public class PlayerController : MonoBehaviour
     private Color originalColor;
     private bool isRed = false;
 
+    //Bubble Column
+
+    private float bubbleLaunchTimer = 0f;
+
     private void Start()
 {
     if (SceneController.Instance != null && SceneController.Instance.hasCustomRespawn)
@@ -208,6 +212,7 @@ public class PlayerController : MonoBehaviour
         // if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
         //     StartCoroutine(BounceRoutine());
 
+        if (bubbleLaunchTimer >= 0f) bubbleLaunchTimer -= Time.deltaTime;
         if (wallCooldownTimer >= 0f) wallCooldownTimer -= Time.deltaTime;
         if (wallJumpInputTimer >= 0f) wallJumpInputTimer -= Time.deltaTime;
         if (bouncePadDuration >= 0f) bouncePadDuration -= Time.deltaTime;
@@ -239,6 +244,9 @@ public class PlayerController : MonoBehaviour
             return;
 
         if (bounceLock) //Locks input after bounce pad
+            return;
+
+        if (bubbleLaunchTimer > 0f)
             return;
 
         if (isRayActive || isGrapplingToTarget)
@@ -819,6 +827,12 @@ public class PlayerController : MonoBehaviour
             bounceLock = false;
         }
     }
+
+    public void ApplyBubbleLaunch(Vector2 velocity, float lockDuration)
+{
+    rb.linearVelocity = velocity;
+    bubbleLaunchTimer = lockDuration;
+}
 
     public void TakeDamage()
     {
