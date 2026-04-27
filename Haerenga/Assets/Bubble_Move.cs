@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Bubble_Move : MonoBehaviour
@@ -55,50 +56,48 @@ public class Bubble_Move : MonoBehaviour
             isActive = !isActive;
             timer = isActive ? activeTime : inactiveTime;
             UpdateVisuals();
+
+            // If bubble turns off while player is inside, release them
+            if (!isActive)
+            {
+                Collider2D col = GetComponent<Collider2D>();
+                List<Collider2D> hits = new List<Collider2D>();
+                col.Overlap(hits);
+                foreach (Collider2D hit in hits)
+                {
+                    if (hit != null && hit.CompareTag("Player"))
+                        hit.GetComponent<PlayerController>()?.SetBubbleState(false, Vector2.zero);
+                }
+            }
         }
     }
 
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (isActive && collision.CompareTag("Player"))
-        {
-            LaunchPlayer(collision.GetComponent<Rigidbody2D>());
-        }
+            collision.GetComponent<PlayerController>()?.SetBubbleState(true, GetLaunchVelocity(collision.GetComponent<Rigidbody2D>()));
     }
 
     void OnTriggerStay2D(Collider2D collision)
     {
         if (isActive && collision.CompareTag("Player"))
-        {
-            Rigidbody2D playerRb = collision.GetComponent<Rigidbody2D>();
-            if (playerRb == null) return;
-
-            Vector2 forceDirection = GetLaunchDirection();
-            float currentVelocityInDirection = Vector2.Dot(playerRb.linearVelocity, forceDirection);
-
-            if (currentVelocityInDirection < launchForce * 0.5f)
-            {
-                LaunchPlayer(playerRb);
-            }
-        }
+            collision.GetComponent<PlayerController>()?.SetBubbleState(true, GetLaunchVelocity(collision.GetComponent<Rigidbody2D>()));
     }
 
-    void LaunchPlayer(Rigidbody2D playerRb)
+    void OnTriggerExit2D(Collider2D collision)
     {
-        if (playerRb == null) return;
+        if (collision.CompareTag("Player"))
+            collision.GetComponent<PlayerController>()?.SetBubbleState(false, Vector2.zero);
+    }
 
+    Vector2 GetLaunchVelocity(Rigidbody2D playerRb)
+    {
         Vector2 forceDirection = GetLaunchDirection();
 
         if (launchDirection == Direction.Up || launchDirection == Direction.Down)
-        {
-            playerRb.linearVelocity = new Vector2(playerRb.linearVelocity.x, 0);
-            playerRb.linearVelocity += forceDirection * launchForce;
-        }
+            return new Vector2(playerRb.linearVelocity.x, forceDirection.y * launchForce);
         else
-        {
-            playerRb.linearVelocity = new Vector2(0, playerRb.linearVelocity.y);
-            playerRb.AddForce(forceDirection * launchForce * 100f, ForceMode2D.Force);
-        }
+            return new Vector2(forceDirection.x * launchForce, playerRb.linearVelocity.y);
     }
 
     Vector2 GetLaunchDirection()

@@ -135,10 +135,10 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sr;
     private Color originalColor;
     private bool isRed = false;
-
+    
     //Bubble Column
-
-    private float bubbleLaunchTimer = 0f;
+    private bool inBubble = false;
+    private Vector2 bubbleLaunchVelocity;
 
     private void Start()
 {
@@ -212,7 +212,6 @@ public class PlayerController : MonoBehaviour
         // if (InputManager.instance.BounceInput && Time.time >= nextBounceTime)
         //     StartCoroutine(BounceRoutine());
 
-        if (bubbleLaunchTimer >= 0f) bubbleLaunchTimer -= Time.deltaTime;
         if (wallCooldownTimer >= 0f) wallCooldownTimer -= Time.deltaTime;
         if (wallJumpInputTimer >= 0f) wallJumpInputTimer -= Time.deltaTime;
         if (bouncePadDuration >= 0f) bouncePadDuration -= Time.deltaTime;
@@ -240,21 +239,18 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovementLock()
     {
-        if (wallJumpInputTimer > 0f) // Locks input when wall jumping
+        if (wallJumpInputTimer > 0f) return;
+        if (bounceLock) return;
+        if (inBubble)
+        {
+            rb.linearVelocity = bubbleLaunchVelocity;
             return;
-
-        if (bounceLock) //Locks input after bounce pad
-            return;
-
-        if (bubbleLaunchTimer > 0f)
-            return;
-
+        }
         if (isRayActive || isGrapplingToTarget)
         {
             rb.linearVelocity = Vector2.zero;
             return;
         }
-
         rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
     }
 
@@ -828,11 +824,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void ApplyBubbleLaunch(Vector2 velocity, float lockDuration)
-{
-    rb.linearVelocity = velocity;
-    bubbleLaunchTimer = lockDuration;
-}
+    public void SetBubbleState(bool state, Vector2 velocity)
+    {
+        inBubble = state;
+        bubbleLaunchVelocity = velocity;
+    }
 
     public void TakeDamage()
     {
