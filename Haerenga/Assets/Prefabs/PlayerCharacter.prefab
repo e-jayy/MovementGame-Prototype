@@ -232,7 +232,7 @@ MonoBehaviour:
   OldwallJumpVerticalForce: 7
   OldwallJumpInputLock: 0.28
   NewwallJumpHorizontalForce: 12
-  NewwallJumpVerticalForce: 10
+  NewwallJumpVerticalForce: 12
   NewwallJumpInputLock: 0.14
   groundCheck: {fileID: 1350386310103286853}
   groundCheckSize: {x: 0.7, y: 0.1}

@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class Bubble_Move : MonoBehaviour
 {
+    [Header("Startup Delay")]
+    [SerializeField] private float startDelay = 0f;
+
     [Header("Timing")]
     [SerializeField] private float activeTime = 2f;
     [SerializeField] private float inactiveTime = 1f;
@@ -17,18 +20,34 @@ public class Bubble_Move : MonoBehaviour
 
     private bool isActive = true;
     private float timer = 0f;
+    private float startDelayTimer = 0f;
+    private bool hasStarted = false;
 
     public enum Direction { Up, Down, Left, Right }
 
     void Start()
     {
-        timer = activeTime;
         spriteRenderer = GetComponent<SpriteRenderer>();
-        UpdateVisuals();
+        startDelayTimer = startDelay;
+        isActive = false;
+        SetAlpha(inactiveAlpha);
     }
 
     void Update()
     {
+        if (!hasStarted)
+        {
+            startDelayTimer -= Time.deltaTime;
+            if (startDelayTimer <= 0f)
+            {
+                hasStarted = true;
+                isActive = true;
+                timer = activeTime;
+                UpdateVisuals();
+            }
+            return;
+        }
+
         timer -= Time.deltaTime;
 
         if (timer <= 0f)
@@ -77,7 +96,6 @@ public class Bubble_Move : MonoBehaviour
         }
         else
         {
-            // Use AddForce for horizontal so player script doesn't immediately cancel it
             playerRb.linearVelocity = new Vector2(0, playerRb.linearVelocity.y);
             playerRb.AddForce(forceDirection * launchForce * 100f, ForceMode2D.Force);
         }
@@ -98,9 +116,14 @@ public class Bubble_Move : MonoBehaviour
     void UpdateVisuals()
     {
         if (spriteRenderer == null) return;
+        SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+    }
 
+    void SetAlpha(byte alpha)
+    {
+        if (spriteRenderer == null) return;
         Color color = spriteRenderer.color;
-        color.a = isActive ? activeAlpha / 255f : inactiveAlpha / 255f;
+        color.a = alpha / 255f;
         spriteRenderer.color = color;
     }
 }

@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class Bubble_Damage : MonoBehaviour
 {
+    [Header("Startup Delay")]
+    [SerializeField] private float startDelay = 0f;
+
     [Header("Timing")]
     [SerializeField] private float activeTime = 2f;
     [SerializeField] private float inactiveTime = 1f;
@@ -12,6 +15,8 @@ public class Bubble_Damage : MonoBehaviour
 
     private bool isActive = true;
     private float timer = 0f;
+    private float startDelayTimer = 0f;
+    private bool hasStarted = false;
     private Collider2D col;
     private SpriteRenderer sr;
 
@@ -19,12 +24,28 @@ public class Bubble_Damage : MonoBehaviour
     {
         col = GetComponent<Collider2D>();
         sr = GetComponent<SpriteRenderer>();
-        timer = activeTime;
-        UpdateVisuals();
+        startDelayTimer = startDelay;
+
+        // Disable during delay
+        col.enabled = false;
+        SetAlpha(inactiveAlpha);
     }
 
     void Update()
     {
+        if (!hasStarted)
+        {
+            startDelayTimer -= Time.deltaTime;
+            if (startDelayTimer <= 0f)
+            {
+                hasStarted = true;
+                timer = activeTime;
+                col.enabled = isActive;
+                UpdateVisuals();
+            }
+            return;
+        }
+
         timer -= Time.deltaTime;
 
         if (timer <= 0f)
@@ -39,9 +60,14 @@ public class Bubble_Damage : MonoBehaviour
     void UpdateVisuals()
     {
         if (sr == null) return;
+        SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+    }
 
+    void SetAlpha(byte alpha)
+    {
+        if (sr == null) return;
         Color color = sr.color;
-        color.a = isActive ? activeAlpha / 255f : inactiveAlpha / 255f;
+        color.a = alpha / 255f;
         sr.color = color;
     }
 }
