@@ -603,7 +603,7 @@ public class PlayerController : MonoBehaviour
             ((1 << grappleHit.collider.gameObject.layer) & grappleLayer) != 0)
         {
             directionalRayHit = grappleHit;
-            StartCoroutine(GrappleToTarget(grappleHit.collider.transform.position));
+            StartCoroutine(GrappleToTarget(grappleHit.point));
         }
 
         return directionalRayHit;
@@ -672,11 +672,7 @@ public class PlayerController : MonoBehaviour
 
         isGrapplingToTarget = true;
         grappleStartPos = transform.position;
-
-        if (rayDirection == Vector2.up || rayDirection == Vector2.down)
-            grappleTargetPos = new Vector2(transform.position.x, targetPos.y);
-        else
-            grappleTargetPos = new Vector2(targetPos.x, transform.position.y);
+        grappleTargetPos = targetPos; // Already the exact hit point, no adjustment needed
 
         grappleLerpTimer = 0f;
 
@@ -692,11 +688,11 @@ public class PlayerController : MonoBehaviour
             if (grappleLineRenderer != null)
             {
                 grappleLineRenderer.SetPosition(0, transform.position);
-                grappleLineRenderer.SetPosition(1, grappleTargetPos); // Hook stays at target
+                grappleLineRenderer.SetPosition(1, grappleTargetPos);
             }
 
             if (hookProjectile != null)
-                hookProjectile.position = grappleTargetPos; // Hook stays pinned at target
+                hookProjectile.position = grappleTargetPos;
 
             yield return null;
         }
@@ -704,7 +700,6 @@ public class PlayerController : MonoBehaviour
         transform.position = grappleTargetPos;
         isGrapplingToTarget = false;
 
-        // Disable line renderer
         DisableGrappleVisuals();
 
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, grappleEndBoost);
