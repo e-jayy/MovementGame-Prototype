@@ -163,6 +163,11 @@ public class PlayerController : MonoBehaviour
 
         wallClingStamina = maxWallClingStamina;
 
+        // if (grappleLineRenderer != null)
+        // {
+        //     grappleLineRenderer.startColor = Color.black;
+        //     grappleLineRenderer.endColor = Color.black;
+        // }
         DisableGrappleVisuals();
     }
 
