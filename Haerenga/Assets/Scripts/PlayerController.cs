@@ -578,19 +578,27 @@ public class PlayerController : MonoBehaviour
     public RaycastHit2D ShootDirectionalRay()
     {
         Vector2 origin = transform.position;
-        directionalRayHit = Physics2D.Raycast(origin, rayDirection, directionalRayDistance, grappleLayer);
 
-        // Update line renderer
+        RaycastHit2D grappleHit = Physics2D.Raycast(origin, rayDirection, directionalRayDistance, grappleLayer);
+        RaycastHit2D groundHit = Physics2D.Raycast(origin, rayDirection, directionalRayDistance, groundLayer);
+
+        bool groundIsBlocking = groundHit.collider != null &&
+                                (grappleHit.collider == null || groundHit.distance < grappleHit.distance);
+
         if (grappleLineRenderer != null)
         {
             grappleLineRenderer.enabled = true;
             grappleLineRenderer.positionCount = 2;
             grappleLineRenderer.SetPosition(0, origin);
 
-            if (directionalRayHit.collider != null &&
-                ((1 << directionalRayHit.collider.gameObject.layer) & grappleLayer) != 0)
+            if (groundIsBlocking)
             {
-                grappleLineRenderer.SetPosition(1, directionalRayHit.point);
+                // Line stops at the ground, no pull
+                grappleLineRenderer.SetPosition(1, groundHit.point);
+            }
+            else if (grappleHit.collider != null)
+            {
+                grappleLineRenderer.SetPosition(1, grappleHit.point);
             }
             else
             {
@@ -598,10 +606,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (directionalRayHit.collider != null &&
-            ((1 << directionalRayHit.collider.gameObject.layer) & grappleLayer) != 0)
+        if (!groundIsBlocking && grappleHit.collider != null &&
+            ((1 << grappleHit.collider.gameObject.layer) & grappleLayer) != 0)
         {
-            StartCoroutine(GrappleToTarget(directionalRayHit.collider.transform.position));
+            directionalRayHit = grappleHit;
+            StartCoroutine(GrappleToTarget(grappleHit.collider.transform.position));
         }
 
         return directionalRayHit;
