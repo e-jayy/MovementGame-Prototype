@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2954126142066773897}
   - component: {fileID: 7689840200588370041}
   - component: {fileID: 3618705372378317076}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: OneWayPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -201,7 +201,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 1
-      m_TileSpriteIndex: 32
+      m_TileSpriteIndex: 33
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -280,10 +280,10 @@ Tilemap:
     m_Data: {fileID: 0}
   - m_RefCount: 0
     m_Data: {fileID: 0}
-  - m_RefCount: 1
-    m_Data: {fileID: -5626005276704509982, guid: 28f46d5c05169124c8c1fb7350a3f877, type: 3}
   - m_RefCount: 0
     m_Data: {fileID: 0}
+  - m_RefCount: 1
+    m_Data: {fileID: -5626005276704509982, guid: 28f46d5c05169124c8c1fb7350a3f877, type: 3}
   m_TileMatrixArray:
   - m_RefCount: 1
     m_Data:

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -59,6 +60,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private Vector2 groundCheckSize = new Vector2(0.5f, 0.1f);
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask onewayLayer;
 
     [Header("Dash Settings")]
     [SerializeField] private float dashSpeed = 20f;
@@ -355,7 +357,7 @@ public class PlayerController : MonoBehaviour
     private void CheckGround()
     {
         wasGrounded = isGrounded;
-        isGrounded = Physics2D.OverlapBox(groundCheck.position, groundCheckSize, 0f, groundLayer);
+        isGrounded = Physics2D.OverlapBox(groundCheck.position, groundCheckSize, 0f, onewayLayer | groundLayer);
 
         if (isGrounded || isWallClinging) jumpsRemaining = maxJumps;
 
