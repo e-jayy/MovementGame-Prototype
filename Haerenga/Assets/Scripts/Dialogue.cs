@@ -6,8 +6,9 @@ using System.ComponentModel;
 
 public class Dialogue : MonoBehaviour
 {
+    public AudioSource dialogueAS;
     public TextMeshProUGUI textComponent;
-    public GameObject nextDialogueBox;
+    public GameObject objectToEnable;
     public string[] lines;
     public float textSpeed;
 
@@ -47,6 +48,7 @@ public class Dialogue : MonoBehaviour
     {
         foreach (char c in lines[index].ToCharArray())
         {
+            dialogueAS.Play();
             textComponent.text += c;
             yield return new WaitForSeconds(textSpeed);
         }
@@ -62,9 +64,9 @@ public class Dialogue : MonoBehaviour
         }
         else
         {
-            if(nextDialogueBox != null)
+            if(objectToEnable != null)
             {
-                nextDialogueBox.SetActive(true);
+                objectToEnable.SetActive(true);
             }
             gameObject.SetActive(false);
         }

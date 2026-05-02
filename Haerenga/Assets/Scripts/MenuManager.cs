@@ -52,7 +52,10 @@ public class MenuManager : MonoBehaviour
         isPaused = true;
         Time.timeScale = 0f;
 
-        _playerController.enabled = false;
+        if(_playerController != null)
+        {
+        _playerController.enabled = false;    
+        }
         
         OpenMainMenu();
     }
@@ -62,7 +65,10 @@ public class MenuManager : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        _playerController.enabled = true;
+        if(_playerController != null)
+        {
+        _playerController.enabled = true;    
+        }
 
         CloseAllMenus();
     }
