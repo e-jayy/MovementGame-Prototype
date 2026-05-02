@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.ComponentModel;
 
 public class Dialogue : MonoBehaviour
 {
@@ -22,7 +23,7 @@ public class Dialogue : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (InputManager.instance.JumpJustPressed)
         {
             if (textComponent.text == lines[index])
             {
@@ -55,7 +56,7 @@ public class Dialogue : MonoBehaviour
     {
         if (index < lines.Length - 1)
         {
-            index++;
+            index++; 
             textComponent.text = string.Empty;
             StartCoroutine(TypeLine());
         }
