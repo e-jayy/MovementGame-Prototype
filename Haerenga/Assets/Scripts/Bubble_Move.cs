@@ -15,7 +15,7 @@ public class Bubble_Move : MonoBehaviour
     [SerializeField] private Direction launchDirection = Direction.Up;
 
     [Header("Visual Feedback")]
-    private SpriteRenderer spriteRenderer;
+    //private SpriteRenderer spriteRenderer;
     [SerializeField] private byte activeAlpha = 200;
     [SerializeField] private byte inactiveAlpha = 60;
 
@@ -32,10 +32,10 @@ public class Bubble_Move : MonoBehaviour
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        //spriteRenderer = GetComponent<SpriteRenderer>();
         startDelayTimer = startDelay;
         isActive = false;
-        SetAlpha(inactiveAlpha);
+        //SetAlpha(inactiveAlpha);
 
         // Start with inactive particles playing
         if (activeParticles != null)
@@ -123,8 +123,8 @@ public class Bubble_Move : MonoBehaviour
 
     void UpdateVisuals()
     {
-        if (spriteRenderer != null)
-            SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+        // if (spriteRenderer != null)
+        //     SetAlpha(isActive ? activeAlpha : inactiveAlpha);
 
         if (isActive)
         {
@@ -138,11 +138,11 @@ public class Bubble_Move : MonoBehaviour
         }
     }
 
-    void SetAlpha(byte alpha)
-    {
-        if (spriteRenderer == null) return;
-        Color color = spriteRenderer.color;
-        color.a = alpha / 255f;
-        spriteRenderer.color = color;
-    }
+    // void SetAlpha(byte alpha)
+    // {
+    //     if (spriteRenderer == null) return;
+    //     Color color = spriteRenderer.color;
+    //     color.a = alpha / 255f;
+    //     spriteRenderer.color = color;
+    // }
 }

@@ -13,6 +13,10 @@ public class Bubble_Damage : MonoBehaviour
     [SerializeField] private byte activeAlpha = 200;
     [SerializeField] private byte inactiveAlpha = 60;
 
+    [Header("Particles")]
+    [SerializeField] private ParticleSystem activeParticles;
+    [SerializeField] private ParticleSystem inactiveParticles;
+
     private bool isActive = true;
     private float timer = 0f;
     private float startDelayTimer = 0f;
@@ -26,9 +30,13 @@ public class Bubble_Damage : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         startDelayTimer = startDelay;
 
-        // Disable during delay
         col.enabled = false;
         SetAlpha(inactiveAlpha);
+
+        if (activeParticles != null)
+            activeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (inactiveParticles != null)
+            inactiveParticles.Play();
     }
 
     void Update()
@@ -59,8 +67,19 @@ public class Bubble_Damage : MonoBehaviour
 
     void UpdateVisuals()
     {
-        if (sr == null) return;
-        SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+        if (sr != null)
+            SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+
+        if (isActive)
+        {
+            if (activeParticles != null)   activeParticles.Play();
+            if (inactiveParticles != null) inactiveParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        else
+        {
+            if (activeParticles != null)   activeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            if (inactiveParticles != null) inactiveParticles.Play();
+        }
     }
 
     void SetAlpha(byte alpha)
