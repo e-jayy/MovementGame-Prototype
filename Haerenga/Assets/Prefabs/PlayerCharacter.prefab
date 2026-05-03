@@ -343,7 +343,7 @@ MonoBehaviour:
   grappleDelay: 0.2
   grappleLerpDuration: 0.2
   grappleEndBoost: 10
-  grappleCooldown: 0.5
+  grappleCooldown: 0.75
   grappleLineRenderer: {fileID: 7994139911982639681}
   hookProjectile: {fileID: 6778115963341360404}
   bounceLayer:

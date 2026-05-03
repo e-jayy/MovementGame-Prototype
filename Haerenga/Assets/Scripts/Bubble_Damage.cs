@@ -22,16 +22,16 @@ public class Bubble_Damage : MonoBehaviour
     private float startDelayTimer = 0f;
     private bool hasStarted = false;
     private Collider2D col;
-    private SpriteRenderer sr;
+    //private SpriteRenderer sr;
 
     void Start()
     {
         col = GetComponent<Collider2D>();
-        sr = GetComponent<SpriteRenderer>();
+        //sr = GetComponent<SpriteRenderer>();
         startDelayTimer = startDelay;
 
         col.enabled = false;
-        SetAlpha(inactiveAlpha);
+        //SetAlpha(inactiveAlpha);
 
         if (activeParticles != null)
             activeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -67,8 +67,8 @@ public class Bubble_Damage : MonoBehaviour
 
     void UpdateVisuals()
     {
-        if (sr != null)
-            SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+        // if (sr != null)
+        //     SetAlpha(isActive ? activeAlpha : inactiveAlpha);
 
         if (isActive)
         {
@@ -82,11 +82,11 @@ public class Bubble_Damage : MonoBehaviour
         }
     }
 
-    void SetAlpha(byte alpha)
-    {
-        if (sr == null) return;
-        Color color = sr.color;
-        color.a = alpha / 255f;
-        sr.color = color;
-    }
+    // void SetAlpha(byte alpha)
+    // {
+    //     if (sr == null) return;
+    //     Color color = sr.color;
+    //     color.a = alpha / 255f;
+    //     sr.color = color;
+    // }
 }
