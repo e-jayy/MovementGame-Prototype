@@ -20,7 +20,8 @@ public class Bubble_Move : MonoBehaviour
     [SerializeField] private byte inactiveAlpha = 60;
 
     [Header("Particles")]
-    [SerializeField] private ParticleSystem bubbleParticles;
+    [SerializeField] private ParticleSystem activeParticles;
+    [SerializeField] private ParticleSystem inactiveParticles;
 
     private bool isActive = true;
     private float timer = 0f;
@@ -34,26 +35,17 @@ public class Bubble_Move : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         startDelayTimer = startDelay;
         isActive = false;
-        //SetAlpha(inactiveAlpha);
-        SetupParticles();
-    }
+        SetAlpha(inactiveAlpha);
 
-    void SetupParticles()
-    {
-        if (bubbleParticles == null) return;
-        bubbleParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        // Start with inactive particles playing
+        if (activeParticles != null)
+            activeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (inactiveParticles != null)
+            inactiveParticles.Play();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Debug.Log("Is Playing: " + bubbleParticles.isPlaying);
-            Debug.Log("Is Stopped: " + bubbleParticles.isStopped);
-            Debug.Log("Particle Count: " + bubbleParticles.particleCount);
-            Debug.Log("Start Speed: " + bubbleParticles.main.startSpeed.constant);
-        }
-
         if (!hasStarted)
         {
             startDelayTimer -= Time.deltaTime;
@@ -131,54 +123,26 @@ public class Bubble_Move : MonoBehaviour
 
     void UpdateVisuals()
     {
-        // if (spriteRenderer != null)
-        //     SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+        if (spriteRenderer != null)
+            SetAlpha(isActive ? activeAlpha : inactiveAlpha);
 
-        if (bubbleParticles != null)
+        if (isActive)
         {
-            if (isActive)
-            {
-                bubbleParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                bubbleParticles.Play();
-            }
-            else
-            {
-                bubbleParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
+            if (activeParticles != null)   activeParticles.Play();
+            if (inactiveParticles != null) inactiveParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        else
+        {
+            if (activeParticles != null)   activeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            if (inactiveParticles != null) inactiveParticles.Play();
         }
     }
 
-
-    void SetParticleAlpha(float alpha)
+    void SetAlpha(byte alpha)
     {
-        var main = bubbleParticles.main;
-        Color startColor = main.startColor.color;
-        startColor.a = alpha;
-        main.startColor = startColor;
-
-        var colorOverLifetime = bubbleParticles.colorOverLifetime;
-        if (colorOverLifetime.enabled)
-        {
-            Gradient gradient = new Gradient();
-            gradient.SetKeys(
-                new GradientColorKey[] {
-                    new GradientColorKey(Color.white, 0f),
-                    new GradientColorKey(Color.white, 1f)
-                },
-                new GradientAlphaKey[] {
-                    new GradientAlphaKey(alpha, 0f),
-                    new GradientAlphaKey(0f, 1f)
-                }
-            );
-            colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
-        }
+        if (spriteRenderer == null) return;
+        Color color = spriteRenderer.color;
+        color.a = alpha / 255f;
+        spriteRenderer.color = color;
     }
-
-    // void SetAlpha(byte alpha)
-    // {
-    //     if (spriteRenderer == null) return;
-    //     Color color = spriteRenderer.color;
-    //     color.a = alpha / 255f;
-    //     spriteRenderer.color = color;
-    // }
 }
