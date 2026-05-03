@@ -34,7 +34,7 @@ public class Bubble_Move : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         startDelayTimer = startDelay;
         isActive = false;
-        SetAlpha(inactiveAlpha);
+        //SetAlpha(inactiveAlpha);
         SetupParticles();
     }
 
@@ -131,8 +131,8 @@ public class Bubble_Move : MonoBehaviour
 
     void UpdateVisuals()
     {
-        if (spriteRenderer != null)
-            SetAlpha(isActive ? activeAlpha : inactiveAlpha);
+        // if (spriteRenderer != null)
+        //     SetAlpha(isActive ? activeAlpha : inactiveAlpha);
 
         if (bubbleParticles != null)
         {
@@ -174,11 +174,11 @@ public class Bubble_Move : MonoBehaviour
         }
     }
 
-    void SetAlpha(byte alpha)
-    {
-        if (spriteRenderer == null) return;
-        Color color = spriteRenderer.color;
-        color.a = alpha / 255f;
-        spriteRenderer.color = color;
-    }
+    // void SetAlpha(byte alpha)
+    // {
+    //     if (spriteRenderer == null) return;
+    //     Color color = spriteRenderer.color;
+    //     color.a = alpha / 255f;
+    //     spriteRenderer.color = color;
+    // }
 }
