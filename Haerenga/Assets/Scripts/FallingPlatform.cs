@@ -2,16 +2,16 @@ using UnityEngine;
 
 public class FallingPlatform : MonoBehaviour
 {
-    [SerializeField] private float fallTime = 1f;     // Time it takes to turn black
+    [SerializeField] private float fallTime = 1f;
 
     [SerializeField] private Collider2D killTrigger;
+
+    [Header("Particles")]
+    [SerializeField] private ParticleSystem rubbleParticles;
 
     private SpriteRenderer sr;
     private Collider2D col;
     private Rigidbody2D rb;
-
-    private Color startColor = Color.white;
-    private Color endColor = Color.black;
 
     private bool hasFallen = false;
     public bool IsFalling { get; private set; }
@@ -23,7 +23,7 @@ public class FallingPlatform : MonoBehaviour
         col = GetComponent<Collider2D>();
         killTrigger.enabled = false;
 
-        rb.bodyType = RigidbodyType2D.Kinematic; // Prevent physics movement
+        rb.bodyType = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0f;
     }
 
@@ -47,35 +47,30 @@ public class FallingPlatform : MonoBehaviour
     {
         hasFallen = true;
 
-        float t = 0f;
-        sr.color = startColor;
+        if (rubbleParticles != null)
+            rubbleParticles.Play();
 
-        // Fade from white → black
-        while (t < fallTime)
-        {
-            t += Time.deltaTime;
-            float lerp = t / fallTime;
-            sr.color = Color.Lerp(startColor, endColor, lerp);
-            yield return null;
-        }
+        yield return new WaitForSeconds(fallTime);
+
+        if (rubbleParticles != null)
+            rubbleParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         // Platform fall
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 1f;
         IsFalling = true;
         killTrigger.enabled = true;
-
-        // yield return new WaitForSeconds(1f);
-
-        // ResetPlatform;
     }
 
     public void ResetPlatform()
     {
         rb.bodyType = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0f;
-        sr.color = startColor;
         IsFalling = false;
-        killTrigger.enabled = false; 
+        hasFallen = false;
+        killTrigger.enabled = false;
+
+        if (rubbleParticles != null)
+            rubbleParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 }

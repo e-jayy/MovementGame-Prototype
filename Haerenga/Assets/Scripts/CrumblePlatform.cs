@@ -1,22 +1,24 @@
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class CrumblingPlatform : MonoBehaviour
 {
     [Header("Timings")]
-    [SerializeField] private float crumbleTime = 1f;     // Time it takes to turn black
-    [SerializeField] private float respawnTime = 2f;     // Time before platform returns
+    [SerializeField] private float crumbleTime = 1f;
+    [SerializeField] private float respawnTime = 2f;
 
-    private SpriteRenderer sr;
+    [Header("Particles")]
+    [SerializeField] private ParticleSystem rubbleParticles;
+    [SerializeField] private ParticleSystem respawnParticles;
+    [SerializeField] private float respawnParticlesMinRate = 1f;
+    [SerializeField] private float respawnParticlesMaxRate = 50f;
+
     [SerializeField] private Tilemap tm;
     [SerializeField] private TilemapRenderer tmr;
 
     public GameObject spikes;
     private Collider2D col;
-
-    private Color startColor = Color.white;
-    private Color endColor = Color.black;
+    private SpriteRenderer sr;
 
     private bool isCrumbing = false;
 
@@ -34,59 +36,32 @@ public class CrumblingPlatform : MonoBehaviour
         }
     }
 
-
     private System.Collections.IEnumerator CrumbleRoutine()
     {
         isCrumbing = true;
 
-        float t = 0f;
+        if (rubbleParticles != null)
+            rubbleParticles.Play();
 
-        if (tm!= null)
-        {
-            tm.color = startColor;
-        }
-        else
-        {
-            sr.color = startColor;
-        }
-
-        // Fade from white → black
-        while (t < crumbleTime)
-        {
-            t += Time.deltaTime;
-            float lerp = t / crumbleTime;
-
-            if (tm!= null)
-            {
-                tm.color = Color.Lerp(startColor, endColor, lerp);
-            }
-            else
-            {
-                sr.color = Color.Lerp(startColor, endColor, lerp);
-            }
-            yield return null;
-        }
+        yield return new WaitForSeconds(crumbleTime);
 
         // Disable platform
-        if (tm!= null)
+        if (tm != null)
         {
             tmr.enabled = false;
-            if(spikes != null)
-            {
-                spikes.SetActive(false);
-            }
+            if (spikes != null) spikes.SetActive(false);
         }
         else
         {
-            sr.enabled = false;
+            if (sr != null) sr.enabled = false;
         }
         col.enabled = false;
-        
+
         if (transform.childCount > 0)
         {
             foreach (Transform child in transform)
             {
-                if(child.GetComponent<SpriteRenderer>() != null && child.GetComponent<Collider2D>() != null)
+                if (child.GetComponent<SpriteRenderer>() != null && child.GetComponent<Collider2D>() != null)
                 {
                     child.GetComponent<SpriteRenderer>().enabled = false;
                     child.GetComponent<Collider2D>().enabled = false;
@@ -94,32 +69,51 @@ public class CrumblingPlatform : MonoBehaviour
             }
         }
 
-        // Wait before respawn
-        yield return new WaitForSeconds(respawnTime);
+        if (rubbleParticles != null)
+            rubbleParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
-        // Reset
-
-        if (tm!= null)
+        // Ramp up respawn particles over respawnTime
+        if (respawnParticles != null)
         {
-            tm.color = startColor;
-            tmr.enabled = true;
-            if(spikes != null)
+            respawnParticles.Play();
+
+            float t = 0f;
+            while (t < respawnTime)
             {
-                spikes.SetActive(true);
+                t += Time.deltaTime;
+                float lerp = t / respawnTime;
+
+                // Ramp emission rate from min to max
+                var emission = respawnParticles.emission;
+                emission.rateOverTime = Mathf.Lerp(respawnParticlesMinRate, respawnParticlesMaxRate, lerp);
+
+                yield return null;
             }
+
+            respawnParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
         else
         {
-            sr.color = startColor;
-            sr.enabled = true;
+            yield return new WaitForSeconds(respawnTime);
+        }
+
+        // Reset
+        if (tm != null)
+        {
+            tmr.enabled = true;
+            if (spikes != null) spikes.SetActive(true);
+        }
+        else
+        {
+            if (sr != null) sr.enabled = true;
         }
         col.enabled = true;
-        
+
         if (transform.childCount > 0)
         {
             foreach (Transform child in transform)
             {
-                if(child.GetComponent<SpriteRenderer>() != null && child.GetComponent<Collider2D>() != null)
+                if (child.GetComponent<SpriteRenderer>() != null && child.GetComponent<Collider2D>() != null)
                 {
                     child.GetComponent<SpriteRenderer>().enabled = true;
                     child.GetComponent<Collider2D>().enabled = true;
