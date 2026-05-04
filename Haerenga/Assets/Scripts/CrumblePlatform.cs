@@ -11,6 +11,8 @@ public class CrumblingPlatform : MonoBehaviour
     private SpriteRenderer sr;
     [SerializeField] private Tilemap tm;
     [SerializeField] private TilemapRenderer tmr;
+
+    public GameObject spikes;
     private Collider2D col;
 
     private Color startColor = Color.white;
@@ -69,6 +71,10 @@ public class CrumblingPlatform : MonoBehaviour
         if (tm!= null)
         {
             tmr.enabled = false;
+            if(spikes != null)
+            {
+                spikes.SetActive(false);
+            }
         }
         else
         {
@@ -97,6 +103,10 @@ public class CrumblingPlatform : MonoBehaviour
         {
             tm.color = startColor;
             tmr.enabled = true;
+            if(spikes != null)
+            {
+                spikes.SetActive(true);
+            }
         }
         else
         {
