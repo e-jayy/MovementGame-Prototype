@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5206173173925661639, guid: 1b2d49ac8e7b51346973cebb9b2e9bca, type: 3}
       propertyPath: m_Name
-      value: Damage_Floor (4) Variant
+      value: Damage_1Wide
       objectReference: {fileID: 0}
     - target: {fileID: 6874985029488898839, guid: 1b2d49ac8e7b51346973cebb9b2e9bca, type: 3}
       propertyPath: m_Size.x
